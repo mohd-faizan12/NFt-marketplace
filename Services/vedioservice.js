@@ -1,55 +1,56 @@
 var axios = require('axios');
 var FormData = require('form-data');
 
-const response = require("../Exception-handeling/response");
+const response = require("../Exception-handeling/Exceptionhandeling");
 
 
 
 class vedioservices {
 
-async UploadVedio(Credential, userData) {
+  async UploadVedio(Credential, userData) {
 
-  try {
-    var data = new FormData();
+    try {
+      var data = new FormData();
       data.append('purposeCode', '3');
       data.append('securityKey', 'key');
       data.append('domain', 'key');
-      if(data){
-    
-      const result = await axios({
+      if (data) {
+
+        const result = await axios({
           method: 'post',
           url: process.env.PAYMENT_URL,
-          headers: { 
-            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI3MDVjNDhkOS1jZTRlLTQwZjktYjRhMS01NTg0YmY4Nzc3ZjAiLCJlbWFpbElkIjoicGFyZGVlcC5yYWdoYXZAdW5pYmxvay5pbyIsImlhdCI6MTY4MTE5ODUwMX0.yqgZVKHt1JhgtXFmVHNjRaOHCzeFKLHpBka22hcLj4A', 
+          headers: {
+            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI3MDVjNDhkOS1jZTRlLTQwZjktYjRhMS01NTg0YmY4Nzc3ZjAiLCJlbWFpbElkIjoicGFyZGVlcC5yYWdoYXZAdW5pYmxvay5pbyIsImlhdCI6MTY4MTE5ODUwMX0.yqgZVKHt1JhgtXFmVHNjRaOHCzeFKLHpBka22hcLj4A',
             ...data.getHeaders()
           },
-          data : data
-      })
+          data: data
+        })
 
-      axios(result)
-.then(function (response) {
-  console.log(JSON.stringify(response.data));
-})
-.catch(function (error) {
-  console.log(error);
-});
+        axios(result)
+          .then(function (response) {
+            logger.info(JSON.stringify(response.data));
+          })
+          .catch(function (error) {
+            logger.info(error);
+          });
 
 
-      if (result&&resul) {
+        if (result && result.data) {
           data["txHash"] = result.data.result.TxHash;
           let final = new testModel(data);
           await final.save();
-          return response.sendSuccess(final);
-      }else{
-          return response.sendError("something went wrong");
+          return response.Success(final);
+        } else {
+          return response.error_Bad_request("something went wrong");
+        }
+
       }
+    }
+    catch (err) {
+      logger.error("payment status could not be updated", err);
+      return response.error_Bad_request("payment status could not be updated", err);
+    }
 
-  }}
-  catch (err) {
-      console.debug("payment status could not be updated", err);
-      return response.sendError("payment status could not be updated", err);
   }
-
-}
 }
 module.exports = new vedioservices();
