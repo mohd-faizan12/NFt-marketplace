@@ -2,7 +2,8 @@ var axios = require('axios');
 var FormData = require('form-data');
 
 const response = require("../Exception-handeling/Exceptionhandeling");
-
+const {createModulerLogger}= require("../LoggerServices/loggerservices")
+const  logger  = createModulerLogger("userServices");
 
 
 class vedioservices {
