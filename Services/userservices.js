@@ -4,7 +4,8 @@ const axios = require("axios");
 
 
 const response = require("../Exception-handeling/Exceptionhandeling");
-const { logger } = require("ethers");
+const {createModulerLogger}= require("../LoggerServices/loggerservices")
+const  logger  = createModulerLogger("userServices");
 
 // const jwt = require("jsonwebtoken");
 // const Jwtkey = require("../utilities/jwtutilis");

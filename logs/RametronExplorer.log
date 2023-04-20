@@ -29,3 +29,8 @@
 [info]	[app.js]	[15:27:51	Database is Connected Succesfully]
 [info]	[app.js]	[15:54:13	Server is Running on Port  http://localhost:7000/]
 [info]	[app.js]	[15:54:13	Database is Connected Succesfully]
+[info]	[app.js]	[09:16:20	Server is Running on Port  http://localhost:7000/]
+[info]	[app.js]	[09:16:20	Database is Connected Succesfully]
+[info]	[app.js]	[09:22:13	Server is Running on Port  http://localhost:7000/]
+[info]	[app.js]	[09:22:13	Database is Connected Succesfully]
+[error]	[userServices]	[09:22:16	data could not be updated]
