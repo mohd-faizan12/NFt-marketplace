@@ -13,7 +13,7 @@ function createModulerLogger(moduleName) {
     return createLogger({
         transports: [
             new transports.File({
-                filename: path.join('./', process.env.LOGGER_DIR || 'logs', process.env.LOG_FILENAME || 'RametronExplorer.log'),
+                filename: path.join('./', process.env.LOGGER_DIR || 'logs', process.env.LOG_FILENAME || 'NFT-Marketplace.log'),
                 format: format.combine(
                     format.timestamp(),
                     format.label({ label: moduleName }),

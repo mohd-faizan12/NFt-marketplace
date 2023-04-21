@@ -12,7 +12,6 @@ app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 const { createModulerLogger } = require("./LoggerServices/loggerservices");
-const { error } = require("winston");
 const logger = createModulerLogger("app.js")
 //-------------------------------------database configration---------------------------------------
 // mongoose.connect('mongodb+srv://mendiratta2000:mendiratta@nftmarketplace.pf01l6q.mongodb.net/test');

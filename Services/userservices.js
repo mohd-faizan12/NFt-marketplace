@@ -1,57 +1,101 @@
 const bcrypt = require("bcrypt");
 const userschema = require("../db/user");
 const axios = require("axios");
-
-
+const bcrypt = require("bcrypt")
 const response = require("../Exception-handeling/Exceptionhandeling");
-const {createModulerLogger}= require("../LoggerServices/loggerservices")
-const  logger  = createModulerLogger("userServices");
-
+const { createModulerLogger } = require("../LoggerServices/loggerservices");
+const { error } = require("winston");
+const logger = createModulerLogger("userServices");
+const authUsermodel = require("../db/authUsermodel")
 // const jwt = require("jsonwebtoken");
 // const Jwtkey = require("../utilities/jwtutilis");
 
 class userServices {
-  //input feilds : walllet id and privatekey
+  // async walletConnect(Credential) {
+  //   try {
+  //     let results = Credential.walletid;
+  //     if (!results) {
+  //       return response.error_Bad_request("wallet id and privatekey is required");
+
+  //     } 
+
+  //       const data = new userschema({
+  //         walletid: Credential.walletid,
+  //       });
+
+  //       await data.save();
+  //       console.log(data);
+
+  //       const result = await axios({
+  //         method: "post",
+  //         url: process.env.PAYMENT_URL, 
+  //         data: {
+  //           senderAddress: Credential.walletid,
+  //           senderPrivateKey: Credential.senderPrivateKey,
+  //           amount: 0.001,
+  //         },
+  //       });
+
+  //       if (result && result.data.result) {
+  //         data["txHash"] = result.data.result.TxHash;
+  //         data["isverified"] = true;
+  //         let final = new userschema(data);
+  //         await final.save();
+  //         //await EmailServices.sendPaymentMail(userData.Email,"../../Tem/payment.html");
+  //         return response.Success(final);
+  //       } else {
+  //         return response.error_Bad_request("something went wrong");
+  //       }
+
+  //   } catch (err) {
+  //     console.log("payment status could not be updated", err);
+  //     return response.error_Bad_request("payment status could not be updated", err);
+  //   }
+  // }
   async walletConnect(Credential) {
     try {
-      let results = Credential.walletid;
-      if (!(Credential.walletid && Credential.senderPrivateKey)) {
-        return response.error_Bad_request("wallet id and privatekey is required");
-      } else {
 
-        const data = new userschema({
-          walletid: Credential.walletid,
-        });
+      if (!Credential.walletid || !Credential.senderPrivateKey || !Credential.password || !Credential.confirmpassword) {
+        return response.error_Bad_request("Please don't leave any field empty");
+      }
+      const findDb = await authUsermodel.find({ walletId: Credential.walletid })
+      if (bcrypt.compareSync(Credential.confirmpassword, findDb.password)){
+
+
+      }else{
+        
+      }
 
         await data.save();
-        console.log(data);
+      console.log(data);
 
-        const result = await axios({
-          method: "post",
-          url: process.env.PAYMENT_URL,
-          data: {
-            senderAddress: Credential.walletid,
-            senderPrivateKey: Credential.senderPrivateKey,
-            amount: 0.001,
-          },
-        });
+      const result = await axios({
+        method: "post",
+        url: process.env.PAYMENT_URL,
+        data: {
+          senderAddress: Credential.walletid,
+          senderPrivateKey: Credential.senderPrivateKey,
+          amount: 0.001,
+        },
+      });
 
-        if (result && result.data.result) {
-          data["txHash"] = result.data.result.TxHash;
-          data["isverified"] = true;
-          let final = new userschema(data);
-          await final.save();
-          //await EmailServices.sendPaymentMail(userData.Email,"../../Tem/payment.html");
-          return response.Success(final);
-        } else {
-          return response.error_Bad_request("something went wrong");
-        }
+      if (result && result.data.result) {
+        data["txHash"] = result.data.result.TxHash;
+        data["isverified"] = true;
+        let final = new userschema(data);
+        await final.save();
+        //await EmailServices.sendPaymentMail(userData.Email,"../../Tem/payment.html");
+        return response.Success(final);
+      } else {
+        return response.error_Bad_request("something went wrong");
+
       }
     } catch (err) {
       console.log("payment status could not be updated", err);
       return response.error_Bad_request("payment status could not be updated", err);
     }
   }
+
 
   //input feilds: walletid,fullname,email,username,password,discord,twitter,bio
 
