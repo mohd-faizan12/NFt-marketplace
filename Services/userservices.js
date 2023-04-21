@@ -74,10 +74,18 @@ class userServices {
         });
 
         if (result && result.data.result) {
+
+          if (Credential.password)
+            Credential.password = bcrypt.hashSync(
+              Credential.password,
+              bcrypt.genSaltSync()
+            );
+
           await userschema.create({
             walletid: Credential.walletid.toLowerCase(),
             txHash: result.data.result.TxHash,
-            isverified: true
+            isverified: true,
+            password: Credential.password
           })
 
           return response.Success("Wallet has verified successfully");
@@ -104,6 +112,9 @@ class userServices {
         if (!data) {
           return response.Not_Found_Error("Invalid request: wallet not Exist");
         }
+
+
+
         else {
           if (Credential.fullname)
             data.fullname = Credential.fullname
@@ -111,8 +122,15 @@ class userServices {
             data.email = Credential.email
           if (Credential.username)
             data.username = Credential.username
+
+
           if (Credential.password)
             data.password = Credential.password
+              = bcrypt.hashSync(
+                Credential.password,
+                bcrypt.genSaltSync()
+              );
+
           if (Credential.discord)
             data.discord = Credential.discord
           if (Credential.twitter)
