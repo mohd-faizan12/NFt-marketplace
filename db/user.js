@@ -4,6 +4,7 @@ const userSchema = new mongoose.Schema({
   walletid: {
     type: String,
      require: true,
+     lowercase:true,
     //unique: true,
   },
   isverified : {

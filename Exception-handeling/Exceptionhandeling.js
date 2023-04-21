@@ -34,6 +34,22 @@ class Error_handeling {
             success: false
         }
     }
+    Not_Found_Error(message, data) {
+        return {
+            message: message,
+            data: data,
+            status: 404,
+            success: false
+        }
+    }
+    Already_Occupied_Error(message, data) {
+        return {
+            message: message,
+            data: data,
+            status: 403,
+            success: false
+        }
+    }
 
 }
 module.exports = new Error_handeling()
