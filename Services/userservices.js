@@ -1,7 +1,7 @@
 const bcrypt = require("bcrypt");
 const userschema = require("../db/user");
 const axios = require("axios");
-const bcrypt = require("bcrypt")
+
 const response = require("../Exception-handeling/Exceptionhandeling");
 const { createModulerLogger } = require("../LoggerServices/loggerservices");
 const { error } = require("winston");
