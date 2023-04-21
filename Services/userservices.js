@@ -54,45 +54,40 @@ class userServices {
   // }
   async walletConnect(Credential) {
     try {
-
-      if (!Credential.walletid || !Credential.senderPrivateKey || !Credential.password || !Credential.confirmpassword) {
-        return response.error_Bad_request("Please don't leave any field empty");
-      }
-      const findDb = await authUsermodel.find({ walletId: Credential.walletid })
-      if (bcrypt.compareSync(Credential.confirmpassword, findDb.password)){
-
-
-      }else{
-        
-      }
-
-        await data.save();
-      console.log(data);
-
-      const result = await axios({
-        method: "post",
-        url: process.env.PAYMENT_URL,
-        data: {
-          senderAddress: Credential.walletid,
-          senderPrivateKey: Credential.senderPrivateKey,
-          amount: 0.001,
-        },
-      });
-
-      if (result && result.data.result) {
-        data["txHash"] = result.data.result.TxHash;
-        data["isverified"] = true;
-        let final = new userschema(data);
-        await final.save();
-        //await EmailServices.sendPaymentMail(userData.Email,"../../Tem/payment.html");
-        return response.Success(final);
+      if (!(Credential.walletid && Credential.senderPrivateKey)) {
+        return response.error_Bad_request("wallet id and privatekey is required");
       } else {
-        return response.error_Bad_request("something went wrong");
+        const data = await userschema.findOne({ walletid: Credential.walletid.toLowerCase() })
+        if (data) {
+          return response.Already_Occupied_Error("Invalid request: wallet id already exists")
+        }
 
+
+        const result = await axios({
+          method: "post",
+          url: process.env.PAYMENT_URL,
+          data: {
+            senderAddress: Credential.walletid,
+            senderPrivateKey: Credential.senderPrivateKey,
+            amount: 0.001,
+          },
+        });
+
+        if (result && result.data.result) {
+          await userschema.create({
+            walletid: Credential.walletid.toLowerCase(),
+            txHash: result.data.result.TxHash,
+            isverified: true
+          })
+
+          return response.Success("Wallet has verified successfully");
+        } else {
+          return response.error_Bad_request("something went wrong");
+        }
       }
     } catch (err) {
-      console.log("payment status could not be updated", err);
-      return response.error_Bad_request("payment status could not be updated", err);
+      logger.error(`500: Error Message : ${err}`);
+      return response.Internal_Server_Error("payment status could not be updated", err);
     }
   }
 
@@ -101,36 +96,36 @@ class userServices {
 
   async uploadProfile(Credential) {
     try {
-      if (Credential.password) {
+      if (!Credential.walletid) {
+        return response.error_Bad_request("wallet id and privatekey is required");
+      } else {
 
-        Credential.password = bcrypt.hashSync(
-          Credential.password,
-          bcrypt.genSaltSync()
-        );
-      }
-
-      {
-        let result = await userschema.updateOne(
-          { walletid: Credential.walletid },
-          {
-            $set: {
-              fullname: Credential.fullname,
-              email: Credential.email,
-              username: Credential.username,
-              password: Credential.password,
-              discord: Credential.discord,
-              twitter: Credential.twitter,
-              bio: Credential.bio,
-            },
-          },
-          { upsert: true }
-        );
-        if (result.modifiedCount || result.upsertedCount) {
-          return response.Success("data is successfully added");
-        } else {
-          return response.error_Bad_request("wallet id not found")
+        const data = await userschema.findOne({ walletid: Credential.walletid.toLowerCase() })
+        if (!data) {
+          return response.Not_Found_Error("Invalid request: wallet not Exist");
+        }
+        else {
+          if (Credential.fullname)
+            data.fullname = Credential.fullname
+          if (Credential.email)
+            data.email = Credential.email
+          if (Credential.username)
+            data.username = Credential.username
+          if (Credential.password)
+            data.password = Credential.password
+          if (Credential.discord)
+            data.discord = Credential.discord
+          if (Credential.twitter)
+            data.twitter = Credential.twitter
+          if (Credential.bio)
+            data.bio = Credential.bio
+          await data.save();
         }
       }
+
+
+      return response.Success("data is successfully added");
+
     } catch (err) {
       logger.error("data could not be updated")
       return response.error_Bad_request("data could not be updated", err);
