@@ -32,6 +32,14 @@ class Controller {
 
     }
 
+    async userLogin(req, res) {
+        const Credential = req.body;
+        const result = await userServices.userLogin(Credential);
+        console.log(result)
+        res.status(parseInt(result.status)).json({ result });
+
+    }
+
     async createNft(req, res) {
         const Credential = req.body;
         const result = await nftservices.createNft(Credential);
@@ -47,8 +55,31 @@ class Controller {
 
     async uploadVedio(req, res) {
         const Credential = req.body;
+        Credential.video = req.file;
+        
         const result = await vedioServices.UploadVedio(Credential);
         res.status(result.status).json({result});
     }
+
+
+    async qrcodeCreate(req, res) {
+        const Credential = req.body;
+        const result = await vedioServices.qrcodeCreate(Credential);
+        console.log(result.data)
+        // res.status(result.status).json({result});
+        res.send(result.data);
+
+    }
+
+
+
+
+
+
+
+
+
+
+    qrcodecreate
 }
 module.exports = new Controller;

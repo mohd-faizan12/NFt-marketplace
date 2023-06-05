@@ -50,7 +50,6 @@ class Error_handeling {
             success: false
         }
     }
-
 }
 module.exports = new Error_handeling()
 

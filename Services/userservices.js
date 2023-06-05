@@ -7,8 +7,8 @@ const { createModulerLogger } = require("../LoggerServices/loggerservices");
 const { error } = require("winston");
 const logger = createModulerLogger("userServices");
 const authUsermodel = require("../db/authUsermodel")
-// const jwt = require("jsonwebtoken");
-// const Jwtkey = require("../utilities/jwtutilis");
+const jwt = require("jsonwebtoken");
+const Jwtkey = require("../utilities/jwtutilis");
 
 class userServices {
   // async walletConnect(Credential) {
@@ -149,11 +149,42 @@ class userServices {
       return response.error_Bad_request("data could not be updated", err);
     }
   }
-  // async createNft(Credential){
-  //  try{
-  //  }
-  //  catch{
-  //  }
-  // }
+
+
+  async userLogin(payload) {
+    try {
+        if (!payload.walletid || !payload.password) {
+            return response.error_Bad_request("Please don't leave any field empty");
+        }
+        let user = await userschema.findOne({ walletid: payload.walletid.toLowerCase() })
+            
+        if(user && bcrypt.compareSync(payload.password, user.password)){
+
+            const tokendata = {
+                walletid: payload.walletid
+            };
+
+        let token = jwt.sign(tokendata, Jwtkey.Jwt_Key, {
+            algorithm: "HS256",
+            expiresIn: "1d",
+        });
+         let result =  await userschema .updateOne(
+            { walletid: payload.walletid },
+            { $set: { jwttoken: token, isActive: true } },
+            { upsert: true }
+        );
+            return response.Success("Token is generated", { token: token});
+    }
+    else{
+      return response.Not_Found_Error("username or password is incorrect ")
+    }
+    } catch (error) {
+      console.log(error)
+        logger.error("user is not create something went to wrong ");
+        return response.error_Bad_request("user is not create something went to wrong ");
+    }
+
+}
+
 }
 module.exports = new userServices();

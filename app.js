@@ -20,6 +20,7 @@ const mongodbconfig = {
     useNewUrlParser: true,
 }
 connection.on('connected', () => logger.info('Database is Connected Succesfully'));
+
 connection.on('connection', () => logger.error('Error is Occuring on Database'));
 
 // const uri = `mongodb://${process.env.DB_HOST}/${process.env.DATABASE_NAME}`

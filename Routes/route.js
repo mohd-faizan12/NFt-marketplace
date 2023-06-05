@@ -1,19 +1,27 @@
 const express = require('express');
 const route = express.Router();
 const Controller = require('../Controller/controller');
-const authController= require("../Controller/authControler")
+const authController= require("../Controller/authControler");
+const nftcontroller = require('../Controller/nftcontroller');
+
+const upload = require('../middleware/multermiddleware');
 
 
 
 
-route.post('/userlogin', authController.userloginController);
+
+route.post('/userlogin', Controller.userLogin);
 route.post('/walletconnect', Controller.walletConnect);
 route.post('/uploadprofile', Controller.uploadProfile);
 route.post('/createnft', Controller.createNft);
 route.post('/createNftCollection', Controller.createNftCollection);
-route.post('/uploadvedio', Controller.uploadVedio);
+route.post('/uploadvedio',upload.single('nftvedio'), Controller.uploadVedio);
+route.post('/qrcodecreate', Controller.qrcodeCreate);
 
 
+//----------------contractr services-------------------------
+route.get('/cgetallnfts', nftcontroller.getallnfts);
+route.post('/getmynfts', nftcontroller.createtoken);
 
 
 module.exports = route;
