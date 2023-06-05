@@ -22,6 +22,9 @@ route.post('/qrcodecreate', Controller.qrcodeCreate);
 //----------------contractr services-------------------------
 route.get('/cgetallnfts', nftcontroller.getallnfts);
 route.post('/getmynfts', nftcontroller.createtoken);
+//----------------------------
+route.post('/userFollowers', Controller.userFollow);
+route.post('/userUnFollowers',Controller.userUnFollow)
 
 
 module.exports = route;

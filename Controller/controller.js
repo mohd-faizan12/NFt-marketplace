@@ -43,22 +43,22 @@ class Controller {
     async createNft(req, res) {
         const Credential = req.body;
         const result = await nftservices.createNft(Credential);
-        res.status(result.status).json({result});
-      
+        res.status(result.status).json({ result });
+
     }
 
     async createNftCollection(req, res) {
         const Credential = req.body;
         const result = await nftservices.createNftCollection(Credential);
-        res.status(result.status).json({result});
+        res.status(result.status).json({ result });
     }
 
     async uploadVedio(req, res) {
         const Credential = req.body;
         Credential.video = req.file;
-        
+
         const result = await vedioServices.UploadVedio(Credential);
-        res.status(result.status).json({result});
+        res.status(result.status).json({ result });
     }
 
 
@@ -69,6 +69,26 @@ class Controller {
         // res.status(result.status).json({result});
         res.send(result.data);
 
+    }
+    async userFollow(req, res) {
+        const objId = req.query.userid;
+        // const querypayload =ObjectId(objId)
+        const { targetUserId } = req.body;
+        // The user performing the follow action
+
+
+        const result = await userServices.userFollow(objId, targetUserId)
+        res.status(result.status).json({ result });
+    }
+    async userUnFollow(req, res) {
+        const objId = req.query.userid;
+        // const querypayload =ObjectId(objId)
+        const { targetUserId } = req.body;
+        // The user performing the follow action
+
+
+        const result = await userServices.userUnFollow(objId, targetUserId)
+        res.status(result.status).json({ result });
     }
 
 
