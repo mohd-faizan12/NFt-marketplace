@@ -10,7 +10,7 @@ const authUsermodel = require("../db/authUsermodel")
 const jwt = require("jsonwebtoken");
 const Jwtkey = require("../utilities/jwtutilis");
 const User = require("../db/user")
-
+const userfollowers = require("../db/userFollowings")
 class userServices {
   // async walletConnect(Credential) {
   //   try {
@@ -180,45 +180,67 @@ class userServices {
         return response.Not_Found_Error("username or password is incorrect ")
       }
     } catch (error) {
-      console.log(error)
+   
       logger.error("user is not create something went to wrong ");
       return response.error_Bad_request("user is not create something went to wrong ");
     }
 
   }
-  async userFollow(objId,targetUserId) {
+  async userFollow(objId, targetUserId) {
     try {
-      console.log("data",objId,targetUserId);
-      // Update follower's following count
-   
-      await User.findByIdAndUpdate(objId, { $inc: { followingCount: 1 } });
+    
 
-      //Update the user being followed's followers count
-      await User.findByIdAndUpdate(targetUserId, { $inc: { followersCount: 1 } });
+      const findData = await userfollowers.find({ follower: objId ,followee:targetUserId});
+     
+      if (findData.length!== 0) {
 
-      return response.Success({ success: true, message: `User ${objId} is now following ${targetUserId} ` });
+
+      return response.Success({ message: `User ${objId} is allready follow ${targetUserId} ` });
+      }
+      const doc = {
+        follower: objId,
+        followee: targetUserId
+      }
+      const craeteData = await userfollowers.create(doc);
+
+
+      return response.Success({ message: `User ${objId} is now following ${targetUserId} ` });
     } catch (error) {
-      console.log(error)
+    
       logger.error("message:data could not be updated")
       return response.error_Bad_request("data could not be updated", error);
     }
   }
-  async userUnFollow(objId,targetUserId) {
+  async userUnFollow(objId, targetUserId) {
     try {
-      console.log("data",objId,targetUserId);
-      // Update follower's following count
-   
-      await User.findByIdAndUpdate(objId, { $inc: { followingCount: -1 } });
 
-      //Update the user being followed's followers count
-      await User.findByIdAndUpdate(targetUserId, { $inc: { followersCount: -1 } });
 
-      return response.Success({ success: true, message: `User ${objId} is now  Unfollowing ${targetUserId} ` });
+
+     const deletedata= await userfollowers.findOneAndDelete({follower:targetUserId ,followee:objId});
+
+     
+      logger.info(`200:User is now unfollwing ${targetUserId} `)
+      return response.Success({ message: `User ${objId} is now  Unfollowing  ${targetUserId} ` });
     } catch (error) {
-      console.log(error)
-      logger.error("message:data could not be updated")
+     
+      logger.error(`500:message:data could not be updated`)
       return response.error_Bad_request("data could not be updated", error);
     }
   }
+  async countuserfollower(userId) {
+    try {
+      const result =await userfollowers.find({followee:userId}).count();
+      const results =await userfollowers.find({follower:userId}).count();
+      logger.info(`200:total no. of Follwers  ${result} ,total no of followee ${results}`)
+      return response.Success({ message: `total no. of Follwers  ${result} ,total no of followee ${results}` });
+
+    } catch (error) {
+  
+      logger.error(`500:Internal server error`)
+      return response.error_Bad_request("Internal server error");
+    }
+  }
+ 
+
 }
 module.exports = new userServices();

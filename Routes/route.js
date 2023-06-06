@@ -5,6 +5,7 @@ const authController= require("../Controller/authControler");
 const nftcontroller = require('../Controller/nftcontroller');
 
 const upload = require('../middleware/multermiddleware');
+const controller = require('../Controller/controller');
 
 
 
@@ -23,8 +24,9 @@ route.post('/qrcodecreate', Controller.qrcodeCreate);
 route.get('/cgetallnfts', nftcontroller.getallnfts);
 route.post('/getmynfts', nftcontroller.createtoken);
 //----------------------------
-route.post('/userFollowers', Controller.userFollow);
-route.post('/userUnFollowers',Controller.userUnFollow)
+route.post('/userFollow', Controller.userFollow);
+route.post('/userUnFollow',Controller.userUnFollow);
+route.post('/totaluserFollowers',controller.CountUserFollowers);
 
 
 module.exports = route;
