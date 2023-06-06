@@ -181,7 +181,7 @@ class userServices {
         return response.Not_Found_Error("username or password is incorrect ")
       }
     } catch (error) {
-   
+
       logger.error("user is not create something went to wrong ");
       return response.error_Bad_request("user is not create something went to wrong ");
     }
@@ -189,14 +189,14 @@ class userServices {
   }
   async userFollow(objId, targetUserId) {
     try {
-    
-
-      const findData = await userfollowers.find({ follower: objId ,followee:targetUserId});
-     
-      if (findData.length!== 0) {
 
 
-      return response.Success({ message: `User ${objId} is allready follow ${targetUserId} ` });
+      const findData = await userfollowers.find({ follower: objId, followee: targetUserId });
+
+      if (findData.length !== 0) {
+
+
+        return response.Success({ message: `User ${objId} is allready follow ${targetUserId} ` });
       }
       const doc = {
         follower: objId,
@@ -207,7 +207,7 @@ class userServices {
 
       return response.Success({ message: `User ${objId} is now following ${targetUserId} ` });
     } catch (error) {
-    
+
       logger.error("message:data could not be updated")
       return response.error_Bad_request("Internal server error", error);
     }
@@ -217,31 +217,31 @@ class userServices {
 
 
 
-     const deletedata= await userfollowers.findOneAndDelete({follower:objId ,followee:targetUserId});
+      const deletedata = await userfollowers.findOneAndDelete({ follower: objId, followee: targetUserId });
 
-     
+
       logger.info(`200:User is now unfollwing ${targetUserId} `)
       return response.Success({ message: `User ${objId} is now  Unfollowing  ${targetUserId} ` });
     } catch (error) {
-     console.log(error)
+      console.log(error)
       logger.error(`500:message:data could not be updated`)
       return response.error_Bad_request("Internal server error", error);
     }
   }
   async countuserfollower(userId) {
     try {
-      const result =await userfollowers.find({followee:userId}).count();
-      const results =await userfollowers.find({follower:userId}).count();
+      const result = await userfollowers.find({ followee: userId }).count();
+      const results = await userfollowers.find({ follower: userId }).count();
       logger.info(`200:total no. of Follwers  ${result} ,total no of followee ${results}`)
-      return response.Success({ message: `Total number of Followers  ${result} ,Total number of followee ${results}` });
+      return response.Success({ message: `Total number of Followers  ${result} ,Total number of followee ${results}`, followers: result, followee: results });
 
     } catch (error) {
-  
+    
       logger.error(`500:Internal server error`)
       return response.error_Bad_request("Internal server error");
     }
   }
- 
+
 
 }
 module.exports = new userServices();
