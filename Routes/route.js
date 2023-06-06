@@ -1,6 +1,6 @@
 const express = require('express');
 const route = express.Router();
-const Controller = require('../Controller/controller');
+const Controller = require('../Controller/controller');          
 const authController= require("../Controller/authControler");
 const nftcontroller = require('../Controller/nftcontroller');
 

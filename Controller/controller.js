@@ -107,6 +107,6 @@ class Controller {
 
 
 
-    qrcodecreate
+
 }
 module.exports = new Controller;

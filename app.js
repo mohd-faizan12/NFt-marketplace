@@ -34,10 +34,11 @@ connection.on('connection', () => logger.error('Error is Occuring on Database'))
 app.use('/apis', route);
 app.get('', (req, res) => {
     logger.info("app is running successfully");
+    res.send("app is running successfully");
 
 });
 
 app.listen(7000, () => {
-    logger.info(`Server is Running on Port  http://localhost:${port}/`);
+    console.log(`Server is Running on Port  http://localhost:${port}/`);
 });
 
