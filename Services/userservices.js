@@ -95,6 +95,7 @@ class userServices {
         }
       }
     } catch (err) {
+      console.log(err)
       logger.error(`500: Error Message : ${err}`);
       return response.Internal_Server_Error("payment status could not be updated", err);
     }

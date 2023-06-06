@@ -44,11 +44,11 @@ class nftServices {
 
   async createNft(Credential) {
     try {
-      if ((!Credential.itemname || !Credential.Supply || !Credential.Blockchain)) {
+      if (Credential.itemname == null|| Credential.supply == null || Credential.blockchain==null) {
       
         return response.error_Bad_request("Please don't leave any field empty");
       }
-      const findCollectionname= await nftcollectionSchema.find.One({})
+      const findCollectionname= await nftcollectionSchema.findOne({})
       const body = {
         collection: Credential.name
 

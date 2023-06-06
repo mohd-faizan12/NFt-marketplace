@@ -3,9 +3,9 @@ const mongoose = require("mongoose");
 const userSchema = new mongoose.Schema({
   walletid: {
     type: String,
-    require: true,
-    lowercase: true,
-    //unique: true,
+     require: true,
+     lowercase:true,
+     unique: true
   },
   isverified: {
     type: Boolean,
@@ -18,16 +18,14 @@ const userSchema = new mongoose.Schema({
     trim: true
   },
   email: {
-    type: String,
-    lowercase: true,
-    unique: true,
-    trim: true
+    type:String,
+    lowercase:true,
+    trim:true
   },
   username: {
-    type: String,
-    lowercase: true,
-    unique: true,
-    trim: true
+    type:String,
+    lowercase:true,
+    trim:true
   },
   password: {
     type: String,
