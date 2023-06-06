@@ -82,16 +82,16 @@ class Controller {
     }
     async userUnFollow(req, res) {
         const objId = req.query.userid;
-        // const querypayload =ObjectId(objId)
+
         const { targetUserId } = req.body;
-        // The user performing the follow action
+
 
 
         const result = await userServices.userUnFollow(objId, targetUserId)
         res.status(result.status).json({ result });
     }
     async CountUserFollowers(req, res) {
-        const userId = req.query.userid;// The user being followed
+        const userId = req.query.userid;
 
 
         const result = await userServices.countuserfollower(userId)

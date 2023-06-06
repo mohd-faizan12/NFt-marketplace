@@ -41,13 +41,7 @@ const userSchema = new mongoose.Schema({
   },
   otp: String,
 
-  // other user fields...
-  followingCount: {
-    type: Number,
-    default: 0
-  },
   
-  followers: [{ type: mongoose.Schema.Types.ObjectId}],
 
 
 
