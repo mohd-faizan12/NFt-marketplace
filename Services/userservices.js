@@ -208,7 +208,7 @@ class userServices {
     } catch (error) {
     
       logger.error("message:data could not be updated")
-      return response.error_Bad_request("data could not be updated", error);
+      return response.error_Bad_request("Internal server error", error);
     }
   }
   async userUnFollow(objId, targetUserId) {
@@ -216,15 +216,15 @@ class userServices {
 
 
 
-     const deletedata= await userfollowers.findOneAndDelete({follower:targetUserId ,followee:objId});
+     const deletedata= await userfollowers.findOneAndDelete({follower:objId ,followee:targetUserId});
 
      
       logger.info(`200:User is now unfollwing ${targetUserId} `)
       return response.Success({ message: `User ${objId} is now  Unfollowing  ${targetUserId} ` });
     } catch (error) {
-     
+     console.log(error)
       logger.error(`500:message:data could not be updated`)
-      return response.error_Bad_request("data could not be updated", error);
+      return response.error_Bad_request("Internal server error", error);
     }
   }
   async countuserfollower(userId) {
@@ -232,7 +232,7 @@ class userServices {
       const result =await userfollowers.find({followee:userId}).count();
       const results =await userfollowers.find({follower:userId}).count();
       logger.info(`200:total no. of Follwers  ${result} ,total no of followee ${results}`)
-      return response.Success({ message: `total no. of Follwers  ${result} ,total no of followee ${results}` });
+      return response.Success({ message: `Total number of Followers  ${result} ,Total number of followee ${results}` });
 
     } catch (error) {
   
