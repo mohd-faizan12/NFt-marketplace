@@ -76,7 +76,7 @@ class userServices {
         });
 
         if (result && result.data.result) {
-console.log("txhash",result.data.result.TxHash)
+
           if (Credential.password)
             Credential.password = bcrypt.hashSync(
               Credential.password,
@@ -96,7 +96,7 @@ console.log("txhash",result.data.result.TxHash)
         }
       }
     } catch (err) {
-      console.log(err)
+   
       logger.error(`500: Error Message : ${err}`);
       return response.Internal_Server_Error("payment status could not be updated", err);
     }
@@ -167,7 +167,7 @@ console.log("txhash",result.data.result.TxHash)
 
       const token = authHeader && authHeader.split(' ')[1];
       const decodedPayload = jwt.decode(token);
-      console.log("token", decodedPayload);
+   
 
       const walletfind = await user.findOne({ walletid: decodedPayload.walletid.toLowerCase() })
       if (!walletfind) {
@@ -190,7 +190,7 @@ console.log("txhash",result.data.result.TxHash)
       return response.Success("Profile  is successfully added");
 
     } catch (err) {
-      console.log(err)
+   
       logger.error("data could not be updated")
       return response.error_Bad_request("data could not be updated", err);
     }
