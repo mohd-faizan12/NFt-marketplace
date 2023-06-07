@@ -59,7 +59,7 @@ class userServices {
       if (!(Credential.walletid && Credential.senderPrivateKey)) {
         return response.error_Bad_request("wallet id and privatekey is required");
       } else {
-        const data = await userschema.findOne({ walletid: Credential.walletid.toLowerCase() },{__v:0})
+        const data = await userschema.findOne({ walletid: Credential.walletid.toLowerCase() }, { __v: 0 })
         if (data) {
           return response.Already_Occupied_Error("Invalid request: wallet id already exists")
         }
@@ -96,7 +96,7 @@ class userServices {
         }
       }
     } catch (err) {
-   
+
       logger.error(`500: Error Message : ${err}`);
       return response.Internal_Server_Error("payment status could not be updated", err);
     }
@@ -167,13 +167,13 @@ class userServices {
 
       const token = authHeader && authHeader.split(' ')[1];
       const decodedPayload = jwt.decode(token);
-   
+
 
       const walletfind = await user.findOne({ walletid: decodedPayload.walletid.toLowerCase() })
       if (!walletfind) {
         return response.Not_Found_Error("Invalid request: wallet not Exist");
       }
-      
+
       const updatedata = await user.updateOne({ walletid: decodedPayload.walletid }, {
         $set: {
           fullname: Credential.fullname,
@@ -185,12 +185,12 @@ class userServices {
           twitter: Credential.twitter
         }
       })
-    
+
 
       return response.Success("Profile  is successfully added");
 
     } catch (err) {
-   
+
       logger.error("data could not be updated")
       return response.error_Bad_request("data could not be updated", err);
     }
@@ -202,7 +202,11 @@ class userServices {
       if (!payload.walletid || !payload.password) {
         return response.error_Bad_request("Please don't leave any field empty");
       }
+   
       let user = await userschema.findOne({ walletid: payload.walletid.toLowerCase() })
+      if (!user) {
+        return response.Not_Found_Error("Invalid request: wallet not Exist");
+      }
 
       if (bcrypt.compareSync(payload.password, user.password)) {
 
@@ -225,7 +229,7 @@ class userServices {
         return response.Not_Found_Error("username or password is incorrect ")
       }
     } catch (error) {
-
+      console.log("error", error)
       logger.error("user is not create something went to wrong ");
       return response.error_Bad_request("user is not create something went to wrong ");
     }

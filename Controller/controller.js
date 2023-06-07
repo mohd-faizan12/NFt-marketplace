@@ -66,7 +66,7 @@ class Controller {
     async qrcodeCreate(req, res) {
         const Credential = req.body;
         const result = await vedioServices.qrcodeCreate(Credential);
-        console.log(result.data)
+     
         // res.status(result.status).json({result});
         res.send(result.data);
 
@@ -102,7 +102,7 @@ class Controller {
         const pageNumber = parseInt(req.query.pageNumber) || 0;
         const limit = parseInt(req.query.limit) || 10;
         const result= await userServices.GetprofileDetails(pageNumber,limit);
-        console.log("result", result)
+  
         res.json({result})
     }
   
