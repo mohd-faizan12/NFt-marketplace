@@ -14,7 +14,7 @@ app.use(bodyParser.json());
 const { createModulerLogger } = require("./LoggerServices/loggerservices");
 const logger = createModulerLogger("app.js")
 //-------------------------------------database configration---------------------------------------
- connect('mongodb+srv://mendiratta2000:mendiratta@nftmarketplace.pf01l6q.mongodb.net/test');
+ //connect('mongodb+srv://mendiratta2000:mendiratta@nftmarketplace.pf01l6q.mongodb.net/test');
 
 const mongodbconfig = {
     useUnifiedTopology: true,
@@ -24,10 +24,10 @@ connection.on('connected', () => logger.info('Database is Connected Succesfully'
 
 connection.on('connection', () => logger.error('Error is Occuring on Database'));
 
-// const uri = `mongodb://${process.env.DB_HOST}/${process.env.DATABASE_NAME}`
-// connect(uri, mongodbconfig).catch(error => {
-//     logger.error("Error is Occuring on Database")
-// })
+const uri = `mongodb://${process.env.DB_HOST}/${process.env.DATABASE_NAME}`
+connect(uri, mongodbconfig).catch(error => {
+    logger.error("Error is Occuring on Database")
+});
 
 
 //---------------------------------------------

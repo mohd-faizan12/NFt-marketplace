@@ -9,8 +9,9 @@ const logger = createModulerLogger("userServices");
 const authUsermodel = require("../db/authUsermodel")
 const jwt = require("jsonwebtoken");
 const Jwtkey = require("../utilities/jwtutilis");
-const User = require("../db/user")
-const userfollowers = require("../db/userFollowings")
+
+const userfollowers = require("../db/userFollowings");
+const user = require("../db/user");
 class userServices {
   // async walletConnect(Credential) {
   //   try {
@@ -104,49 +105,76 @@ class userServices {
 
   //input feilds: walletid,fullname,email,username,password,discord,twitter,bio
 
+  // async uploadProfile(Credential) {
+  //   try {
+  //     if (!Credential) {
+  //       return response.error_Bad_request("please fill proper bodypayload ");
+  //     } else {
+
+  //       const data = await userschema.findOne({ walletid: Credential.walletid.toLowerCase() })
+  //       if (!data) {
+  //         return response.Not_Found_Error("Invalid request: wallet not Exist");
+  //       }
+
+
+
+  //       else {
+  //         if (Credential.fullname)
+  //           data.fullname = Credential.fullname
+  //         if (Credential.email)
+  //           data.email = Credential.email
+  //         if (Credential.username)
+  //           data.username = Credential.username
+
+
+  //         if (Credential.password)
+  //           data.password = Credential.password
+  //             = bcrypt.hashSync(
+  //               Credential.password,
+  //               bcrypt.genSaltSync()
+  //             );
+
+  //         if (Credential.discord)
+  //           data.discord = Credential.discord
+  //         if (Credential.twitter)
+  //           data.twitter = Credential.twitter
+  //         if (Credential.bio)
+  //           data.bio = Credential.bio
+  //         await data.save();
+  //       }
+  //     }
+
+
+  //     return response.Success("Profile  is successfully added");
+
+  //   } catch (err) {
+  //     logger.error("data could not be updated")
+  //     return response.error_Bad_request("data could not be updated", err);
+  //   }
+  // }
   async uploadProfile(Credential) {
+    let finfdb = await user.exists({username: Credential.username,email:Credential.email});    
+    if(finfdb){
+      return response.Unauthorized_response("Profile allready exist with given  username and emailAddress !!");
+   }
     try {
-      if (!Credential.walletid) {
-        return response.error_Bad_request("wallet id and privatekey is required");
-      } else {
+      const data = {
+        fullname: Credential.fullname,
+        email: Credential.email,
+        username: Credential.username,
+        password: Credential.password,
+        bio: Credential.bio,
+        discord: Credential.discord,
+        twitter: Credential.twitter
 
-        const data = await userschema.findOne({ walletid: Credential.walletid.toLowerCase() })
-        if (!data) {
-          return response.Not_Found_Error("Invalid request: wallet not Exist");
-        }
-
-
-
-        else {
-          if (Credential.fullname)
-            data.fullname = Credential.fullname
-          if (Credential.email)
-            data.email = Credential.email
-          if (Credential.username)
-            data.username = Credential.username
-
-
-          if (Credential.password)
-            data.password = Credential.password
-              = bcrypt.hashSync(
-                Credential.password,
-                bcrypt.genSaltSync()
-              );
-
-          if (Credential.discord)
-            data.discord = Credential.discord
-          if (Credential.twitter)
-            data.twitter = Credential.twitter
-          if (Credential.bio)
-            data.bio = Credential.bio
-          await data.save();
-        }
       }
-
-
-      return response.Success("data is successfully added");
+      console.log("data",data)
+      const db = new user(data);
+      await db.save();
+      return response.Success("Profile  is successfully added");
 
     } catch (err) {
+      console.log(err)
       logger.error("data could not be updated")
       return response.error_Bad_request("data could not be updated", err);
     }
@@ -160,7 +188,7 @@ class userServices {
       }
       let user = await userschema.findOne({ walletid: payload.walletid.toLowerCase() })
 
-      if (user && bcrypt.compareSync(payload.password, user.password)) {
+      if ( bcrypt.compareSync(payload.password, user.password)) {
 
         const tokendata = {
           walletid: payload.walletid
@@ -236,7 +264,7 @@ class userServices {
       return response.Success({ message: `Total number of Followers  ${result} ,Total number of followee ${results}`, followers: result, followee: results });
 
     } catch (error) {
-    
+
       logger.error(`500:Internal server error`)
       return response.error_Bad_request("Internal server error");
     }

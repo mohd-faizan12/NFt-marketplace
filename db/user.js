@@ -1,12 +1,12 @@
 const mongoose = require("mongoose");
+const { create } = require("./userFollowings");
 
 const userSchema = new mongoose.Schema({
-  walletid: {
-    type: String,
-     require: true,
-     lowercase:true,
-     unique: true
-  },
+walletid:{
+  type: String,
+  lowercase: true,
+  trim: true
+},
   isverified: {
     type: Boolean,
     default: false
@@ -18,30 +18,37 @@ const userSchema = new mongoose.Schema({
     trim: true
   },
   email: {
-    type:String,
-    lowercase:true,
-    trim:true
+    type: String,
+    lowercase: true,
+    trim: true
+    
   },
   username: {
-    type:String,
-    lowercase:true,
-    trim:true
+    type: String,
+    lowercase: true,
+    trim: true
   },
   password: {
     type: String,
     trim: true
   },
-  discord: String,
-  twitter: String,
-  bio: String,
-
-  token: {
+  discord: {
     type: String,
-    default: ''
-  },
-  otp: String,
 
-  
+  },
+  twitter: {
+    type: String,
+  },
+  bio: {
+    type: String,
+  },
+  timestamp: {
+    type: Date,
+    default: new Date()
+}
+
+
+
 
 
 

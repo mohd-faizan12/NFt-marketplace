@@ -78,7 +78,7 @@ class Controller {
 
 
         const result = await userServices.userFollow(objId, targetUserId)
-        res.status(result.status).json({ result });
+        res.json(result);
     }
     async userUnFollow(req, res) {
         const objId = req.query.userid;
@@ -88,16 +88,16 @@ class Controller {
 
 
         const result = await userServices.userUnFollow(objId, targetUserId)
-        res.status(result.status).json({ result });
+        res.json(result);
     }
     async CountUserFollowers(req, res) {
         const userId = req.query.userid;
 
 
         const result = await userServices.countuserfollower(userId)
-        res.status(result.status).json({ result });
+        res.json(result);
     }
-
+  
 
 
 
