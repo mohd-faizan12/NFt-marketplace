@@ -21,22 +21,23 @@ class Controller {
     async walletConnect(req, res) {
         const Credential = req.body;
         const result = await userServices.walletConnect(Credential);
-        res.status(result.status).json({ result });
+        res.json({result})
 
     }
 
     async uploadProfile(req, res) {
         const Credential = req.body;
-        const result = await userServices.uploadProfile(Credential);
-        res.status(result.status).json({ result });
+        const authHeader = req.headers['authorization'];
+        const result = await userServices.uploadProfile(Credential,authHeader);
+        res.json({result})
 
     }
 
     async userLogin(req, res) {
         const Credential = req.body;
         const result = await userServices.userLogin(Credential);
-        console.log(result)
-        res.status(parseInt(result.status)).json({ result });
+      
+        res.json({result})
 
     }
 
@@ -50,7 +51,7 @@ class Controller {
     async createNftCollection(req, res) {
         const Credential = req.body;
         const result = await nftservices.createNftCollection(Credential);
-        res.status(result.status).json({ result });
+        res.json({result})
     }
 
     async uploadVedio(req, res) {
@@ -58,7 +59,7 @@ class Controller {
         Credential.video = req.file;
 
         const result = await vedioServices.UploadVedio(Credential);
-        res.status(result.status).json({ result });
+        res.json({result})
     }
 
 
@@ -88,14 +89,21 @@ class Controller {
 
 
         const result = await userServices.userUnFollow(objId, targetUserId)
-        res.json(result);
+        res.json({result});
     }
     async CountUserFollowers(req, res) {
         const userId = req.query.userid;
 
 
         const result = await userServices.countuserfollower(userId)
-        res.json(result);
+        res.json({result});
+    }
+    async getprofileDetails(req,res){
+        const pageNumber = parseInt(req.query.pageNumber) || 0;
+        const limit = parseInt(req.query.limit) || 10;
+        const result= await userServices.GetprofileDetails(pageNumber,limit);
+        console.log("result", result)
+        res.json({result})
     }
   
 

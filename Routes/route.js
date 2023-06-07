@@ -27,12 +27,12 @@ route.post('/qrcodecreate', authMiddleware.userAuthanticationMiddleware, Control
 // route.post('/uploadvedio',  upload.single('nftvedio'), Controller.uploadVedio);
 // route.post('/qrcodecreate',  Controller.qrcodeCreate);
 //----------------contractr services-------------------------
-route.get('/cgetallnfts', nftcontroller.getallnfts);
-route.post('/getmynfts', nftcontroller.createtoken);
+route.get('/cgetallnfts',authMiddleware.userAuthanticationMiddleware, nftcontroller.getallnfts);
+route.post('/getmynfts',authMiddleware.userAuthanticationMiddleware, nftcontroller.createtoken);
 //----------------------------
 route.post('/userFollow', authMiddleware.userAuthanticationMiddleware, Controller.userFollow);
 route.post('/userUnFollow', authMiddleware.userAuthanticationMiddleware, Controller.userUnFollow);
 route.post('/totaluserFollowers', authMiddleware.userAuthanticationMiddleware, controller.CountUserFollowers);
-
+route.get('/getprofileDetails',authMiddleware.userAuthanticationMiddleware,Controller.getprofileDetails)
 
 module.exports = route;

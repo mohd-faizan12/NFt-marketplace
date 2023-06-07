@@ -59,7 +59,7 @@ class userServices {
       if (!(Credential.walletid && Credential.senderPrivateKey)) {
         return response.error_Bad_request("wallet id and privatekey is required");
       } else {
-        const data = await userschema.findOne({ walletid: Credential.walletid.toLowerCase() })
+        const data = await userschema.findOne({ walletid: Credential.walletid.toLowerCase() },{__v:0})
         if (data) {
           return response.Already_Occupied_Error("Invalid request: wallet id already exists")
         }
@@ -152,25 +152,41 @@ class userServices {
   //     return response.error_Bad_request("data could not be updated", err);
   //   }
   // }
-  async uploadProfile(Credential) {
-    let finfdb = await user.exists({username: Credential.username,email:Credential.email});    
-    if(finfdb){
+  async uploadProfile(Credential, authHeader) {
+    let finfdb = await user.exists({ username: Credential.username, email: Credential.email });
+    if (finfdb) {
       return response.Unauthorized_response("Profile allready exist with given  username and emailAddress !!");
-   }
+    }
     try {
-      const data = {
-        fullname: Credential.fullname,
-        email: Credential.email,
-        username: Credential.username,
-        password: Credential.password,
-        bio: Credential.bio,
-        discord: Credential.discord,
-        twitter: Credential.twitter
+      Credential.password = Credential.password = bcrypt.hashSync(
+        Credential.password,
+        bcrypt.genSaltSync()
 
+      );
+
+
+      const token = authHeader && authHeader.split(' ')[1];
+      const decodedPayload = jwt.decode(token);
+      console.log("token", decodedPayload);
+
+      const walletfind = await user.findOne({ walletid: decodedPayload.walletid.toLowerCase() })
+      if (!walletfind) {
+        return response.Not_Found_Error("Invalid request: wallet not Exist");
       }
-      console.log("data",data)
-      const db = new user(data);
-      await db.save();
+      
+      const updatedata = await user.updateOne({ walletid: decodedPayload.walletid }, {
+        $set: {
+          fullname: Credential.fullname,
+          email: Credential.email,
+          username: Credential.username,
+          bio: Credential.bio,
+          password: Credential.password,
+          discord: Credential.discord,
+          twitter: Credential.twitter
+        }
+      })
+    
+
       return response.Success("Profile  is successfully added");
 
     } catch (err) {
@@ -188,7 +204,7 @@ class userServices {
       }
       let user = await userschema.findOne({ walletid: payload.walletid.toLowerCase() })
 
-      if ( bcrypt.compareSync(payload.password, user.password)) {
+      if (bcrypt.compareSync(payload.password, user.password)) {
 
         const tokendata = {
           walletid: payload.walletid
@@ -268,6 +284,21 @@ class userServices {
       logger.error(`500:Internal server error`)
       return response.error_Bad_request("Internal server error");
     }
+  }
+  async GetprofileDetails(pageNumber, limit) {
+    try {
+
+
+      const data = await user.find({ __v: 0 }).skip(limit * pageNumber).limit(limit).sort({ time: 1 })
+      if (!data) {
+        response.Not_Found_Error({ message: "Data not found on db" })
+      }
+      return response.Success({ message: "profile details  is successfully get", data: data })
+
+    } catch (error) {
+      return response.error_Bad_request({ message: "Something went to wrong " })
+    }
+
   }
 
 

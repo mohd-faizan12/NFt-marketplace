@@ -45,7 +45,13 @@ walletid:{
   timestamp: {
     type: Date,
     default: new Date()
+},
+token: {
+  type: String,
+  default: ''
 }
+
+
 
 
 
