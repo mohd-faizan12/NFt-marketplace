@@ -11,7 +11,7 @@ walletid:{
     type: Boolean,
     default: false
   },
-  txhash: String,
+  txHash: String,
   fullname: {
     type: String,
     lowercase: true,

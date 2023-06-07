@@ -76,7 +76,7 @@ class userServices {
         });
 
         if (result && result.data.result) {
-
+console.log("txhash",result.data.result.TxHash)
           if (Credential.password)
             Credential.password = bcrypt.hashSync(
               Credential.password,
