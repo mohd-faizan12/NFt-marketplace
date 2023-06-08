@@ -56,7 +56,7 @@ class Controller {
 
     async uploadVedio(req, res) {
         const Credential = req.body;
-        Credential.video = req.file;
+        Credential.video = req.files;
 
         const result = await vedioServices.UploadVedio(Credential);
         res.json({result})

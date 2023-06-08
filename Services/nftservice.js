@@ -69,25 +69,25 @@ class nftServices {
 
 
 
-  // async createNftCollection(Credential) {
-  //   try {
-  //     const data = new collectionSchema({
-  //       name: Credential.name,
-  //       url: Credential.url,
-  //       links: Credential.links,
-  //       creatorearnings: Credential.creatorearnings,
-  //       Blockchain: Credential.Blockchain,
-  //       paymenttoken: Credential.paymenttoken,
-  //       Category: Credential.Category
-  //     });
-  //     await data.save();
-  //     logger.info(data);
-  //     return response.Success(["data added"]);
-  //   } catch (err) {
-  //     logger.error("nft not created", err);
-  //     return response.error_Bad_request("nft not created", err);
-  //   }
-  // }
+  async createNftCollection(Credential) {
+    try {
+      const data = new collectionSchema({
+        name: Credential.name,
+        url: Credential.url,
+        links: Credential.links,
+        creatorearnings: Credential.creatorearnings,
+        Blockchain: Credential.Blockchain,
+        paymenttoken: Credential.paymenttoken,
+        Category: Credential.Category
+      });
+      await data.save();
+      logger.info(data);
+      return response.Success(["data added"]);
+    } catch (err) {
+      logger.error("nft not created", err);
+      return response.error_Bad_request("nft not created", err);
+    }
+  }
 
   async createNftCollection(Credential) {
     try {

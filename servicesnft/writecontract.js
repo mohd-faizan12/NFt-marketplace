@@ -1,6 +1,7 @@
 // To Use env file Variables
 require('dotenv').config();
 const response = require("../Exception-handeling/Exceptionhandeling");
+const nftSchema = require("../db/createNftmodel");
 
 
 const Web3 = require("web3");
@@ -21,9 +22,26 @@ class writetoken{
      */
  async createtoken(Credential) {
     try {
+
+        if (!Credential.itemname){
+        return response.error_Bad_request("Please don't leave any field empty");
+        }
+
+        const datasave = new nftSchema({
+            itemname:Credential.itemname,
+            supply:Credential.supply,
+            blockchain:Credential.blockchain,
+            collection:Credential.collection,
+            description:Credential.description,
+            imagehash:Credential.imagehash,
+            thumbnailhash:Credential.thumbnailhash,
+            amount:Credential.amount
+
+        })
+        await datasave.save();
+        logger.info(datasave);
         // const value = amount;
         // const UNIBTAmountInWei = Web3.utils.toWei(`${value}`, "ether");
-        const amount =Credential.amount;
         let senderPrivateKey=Credential.senderPrivateKey;
 
         senderPrivateKey = senderPrivateKey.startsWith("0x")
