@@ -202,7 +202,7 @@ class userServices {
       if (!payload.walletid || !payload.password) {
         return response.error_Bad_request("Please don't leave any field empty");
       }
-   
+
       let user = await userschema.findOne({ walletid: payload.walletid.toLowerCase() })
       if (!user) {
         return response.Not_Found_Error("Invalid request: wallet not Exist");
@@ -220,7 +220,7 @@ class userServices {
         });
         let result = await userschema.updateOne(
           { walletid: payload.walletid },
-          { $set: { jwttoken: token, isActive: true } },
+          { $set: { jwttoken: token, isverified: true } },
           { upsert: true }
         );
         return response.Success("Token is generated", { token: token });
@@ -229,7 +229,7 @@ class userServices {
         return response.Not_Found_Error("username or password is incorrect ")
       }
     } catch (error) {
-      console.log("error", error)
+   
       logger.error("user is not create something went to wrong ");
       return response.error_Bad_request("user is not create something went to wrong ");
     }
@@ -271,7 +271,7 @@ class userServices {
       logger.info(`200:User is now unfollwing ${targetUserId} `)
       return response.Success({ message: `User ${objId} is now  Unfollowing  ${targetUserId} ` });
     } catch (error) {
-      console.log(error)
+     
       logger.error(`500:message:data could not be updated`)
       return response.error_Bad_request("Internal server error", error);
     }
@@ -289,17 +289,19 @@ class userServices {
       return response.error_Bad_request("Internal server error");
     }
   }
-  async GetprofileDetails(pageNumber, limit) {
+  async GetprofileDetails(pageNumber, limit, authHeader) {
     try {
 
-
-      const data = await user.find({ __v: 0 }).skip(limit * pageNumber).limit(limit).sort({ time: 1 })
+      const gettoken = authHeader.substr(7);
+      const data = await user.findOne({ jwttoken: gettoken },{jwttoken:0,__v:0}).skip(limit * pageNumber).limit(limit).sort({ time: 1 })
       if (!data) {
         response.Not_Found_Error({ message: "Data not found on db" })
       }
+      logger.info(`200:profile details  is successfully get`)
       return response.Success({ message: "profile details  is successfully get", data: data })
 
     } catch (error) {
+      logger.error(`500:Something went to wrong`)
       return response.error_Bad_request({ message: "Something went to wrong " })
     }
 

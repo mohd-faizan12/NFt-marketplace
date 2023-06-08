@@ -99,9 +99,10 @@ class Controller {
         res.json({result});
     }
     async getprofileDetails(req,res){
+        const authHeader = req.headers['authorization'];
         const pageNumber = parseInt(req.query.pageNumber) || 0;
         const limit = parseInt(req.query.limit) || 10;
-        const result= await userServices.GetprofileDetails(pageNumber,limit);
+        const result= await userServices.GetprofileDetails(pageNumber,limit,authHeader);
   
         res.json({result})
     }

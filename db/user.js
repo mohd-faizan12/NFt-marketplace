@@ -46,7 +46,7 @@ walletid:{
     type: Date,
     default: new Date()
 },
-token: {
+jwttoken: {
   type: String,
   default: ''
 }
