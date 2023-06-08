@@ -252,11 +252,11 @@ class userServices {
       }
       const craeteData = await userfollowers.create(doc);
 
-
+      logger.info(`200:user now starting following`);
       return response.Success({ message: `User ${objId} is now following ${targetUserId} ` });
     } catch (error) {
 
-      logger.error("message:data could not be updated")
+      logger.error(`500:message:data could not be updated`);
       return response.error_Bad_request("Internal server error", error);
     }
   }
@@ -295,6 +295,7 @@ class userServices {
       const gettoken = authHeader.substr(7);
       const data = await user.findOne({ jwttoken: gettoken },{jwttoken:0,__v:0}).skip(limit * pageNumber).limit(limit).sort({ time: 1 })
       if (!data) {
+        logger.error(`500:Data not found on db`)
         response.Not_Found_Error({ message: "Data not found on db" })
       }
       logger.info(`200:profile details  is successfully get`)

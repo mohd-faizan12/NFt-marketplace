@@ -36,3 +36,9 @@ route.post('/totaluserFollowers', authMiddleware.userAuthanticationMiddleware, c
 route.get('/getprofileDetails',authMiddleware.userAuthanticationMiddleware,Controller.getprofileDetails)
 
 module.exports = route;
+
+
+
+
+
+//# domain https://nftbackend.uniblok.io
