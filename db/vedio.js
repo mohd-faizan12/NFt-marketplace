@@ -27,6 +27,9 @@ const nft_Schema = new mongoose.Schema({
   Externallink: {
     type:String,
   },
+  transactionHash:String,
+
+  
 
   Description:String ,
 

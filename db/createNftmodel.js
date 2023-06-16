@@ -26,6 +26,13 @@ const nft_Schema = new mongoose.Schema({
     type: String,
   },
 
+  walletid:{
+    type: String,
+    lowercase: true,
+    trim: true
+  },
+  
+
   Description: String,
 
   Imagehash: String,

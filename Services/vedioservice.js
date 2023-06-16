@@ -69,27 +69,6 @@ class vedioservices {
         return response.error_Bad_request("Please don't leave any field empty");
         }
 
-        const datasave = new nftSchema({
-            itemname:Credential.itemname,
-            supply:Credential.supply,
-            blockchain:Credential.blockchain,
-            collection:Credential.collection,
-            description:Credential.description,
-            imagehash:Credential.imagehash,
-            thumbnailhash:Credential.thumbnailhash,
-            amount:Credential.amount
-
-        })
-
-        await datasave.save();
-        logger.info(datasave);
-       
-        if(!datasave)
-        {
-          return response.error_Bad_request("Please pass all feilds correct");
-          }
-
-
         let senderPrivateKey=Credential.senderPrivateKey;
 
         senderPrivateKey = senderPrivateKey.startsWith("0x")
@@ -149,21 +128,42 @@ class vedioservices {
             createTransaction.rawTransaction
         );
     
-
         logger.info(
             `Transaction successful with hash: ${createReceipt.transactionHash}`
         );
         logger.info(
             `Transaction details: ${JSON.stringify(createReceipt, null, "  ")}`
         );
-       
-       
+
         let data2 = `https://${result.data.url}/filedownload?fileId=${result1.data.responseArray[0].fileId}&sessionKey=${result.data.sessionKey}`;
         let data3 = `https://${result.data.url}/filedownload?fileId=${result1.data.responseArray[1].fileId}&sessionKey=${result.data.sessionKey}`;
         console.log(data2)
         console.log(data3)
         console.log("transactionHash",createReceipt.transactionHash)
         console.log(account.address)
+
+        const datasave = new nftSchema({
+          itemname:Credential.itemname,
+          supply:Credential.supply,
+          blockchain:Credential.blockchain,
+          collection:Credential.collection,
+          description:Credential.description,
+          videohash:data3,
+          thumbnailhash:data2,
+          amount:Credential.amount,
+          transactionHash:createReceipt.transactionHash,
+          walletid:account.address
+
+
+      })
+
+      await datasave.save();
+
+     
+      if(!datasave)
+      {
+        return response.error_Bad_request("Please pass all feilds correct");
+        }
 
             return response.Success("final",{...result1.data.responseArray,"sessionKey":result.data.sessionKey,"transactionHash":createReceipt.transactionHash});
           // result1.data.responseArray[0].fileId
@@ -176,7 +176,7 @@ class vedioservices {
     catch (err) {
       console.log(err);
       logger.error("internal server error", err);
-      return response.error_Bad_request("internal serveer error", err);
+      return response.error_Bad_request("something went wrong", err);
     }
   }
 
