@@ -194,9 +194,9 @@ class userServices {
       logger.error("data could not be updated")
       return response.error_Bad_request("data could not be updated", err);
     }
-  }
+  } 
 
-
+ 
   async userLogin(payload) {
     try {
       if (!payload.walletid || !payload.password) {

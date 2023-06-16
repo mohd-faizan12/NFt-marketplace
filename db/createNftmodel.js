@@ -30,6 +30,7 @@ const nft_Schema = new mongoose.Schema({
 
   Imagehash: String,
   Thumbnailhash: String,
+  bidding:Array
 
 });
 

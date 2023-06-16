@@ -33,13 +33,14 @@ class vedioservices {
             "securityKey": "public"
         },
         })
+        console.log("rtPr upload result", result.data)
       //  axios(result)
         if (result && result.data && result.data.url) {
           let data1 = `https://${result.data.url}/fileupload`;          
             var formData = new FormData();
             formData.append('sessionKey', result.data.sessionKey);
+            formData.append('files', Credential.thumbnail[0].buffer,Credential.thumbnail[0].originalname)     
             formData.append('files', Credential.video[0].buffer, Credential.video[0].originalname)     
-            formData.append('files', Credential.video[1].buffer, Credential.video[1].originalname)     
 
 
             // formData.append('files', fs.createReadStream(`/home/dell/Desktop/NFT-Marketplace/uploads/${Credential.video.filename}`))     
@@ -82,6 +83,11 @@ class vedioservices {
 
         await datasave.save();
         logger.info(datasave);
+       
+        if(!datasave)
+        {
+          return response.error_Bad_request("Please pass all feilds correct");
+          }
 
 
         let senderPrivateKey=Credential.senderPrivateKey;
@@ -164,7 +170,7 @@ class vedioservices {
   
 
         } else {
-          return response.error_Bad_request("please pass valid file");
+          return response.error_Bad_request("please pass valid file",result.data.message);
         }
     }
     catch (err) {
@@ -173,10 +179,6 @@ class vedioservices {
       return response.error_Bad_request("internal serveer error", err);
     }
   }
-
-
-
-
 
   async qrcodeCreate(Credential) {
 
@@ -224,7 +226,7 @@ class vedioservices {
     catch (err) {
       console.log(err);
       logger.error("something went wrong", err);
-      return response.error_Bad_request("something went wrong", err);
+      return  response.error_Bad_request("something went wrong", err);
     }
   }
   async userFollowing(){
