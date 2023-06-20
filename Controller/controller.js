@@ -61,7 +61,7 @@ class Controller {
 
 
         const result = await vedioServices.UploadVedio(Credential);
-        res.json({result})
+        res.status(result.status).json({ result });
     }
 
 
@@ -108,6 +108,26 @@ class Controller {
   
         res.json({result})
     }
+
+
+    async directSale(req, res) {
+        const Credential = req.body;
+        const result = await nftservices.directSale(Credential);
+        res.json({result});
+
+    }
+
+
+
+
+        async getNFTpreview(req, res) {
+        const Credential = req.query;
+        const result = await nftservices.getNFTpreview(Credential)
+        res.json({result});
+    }
+    
+
+
   
 
 

@@ -1,3 +1,4 @@
+// const { string } = require("hardhat/internal/core/params/argumentTypes");
 const mongoose = require("mongoose");
 
 const nft_Schema = new mongoose.Schema({
@@ -8,21 +9,20 @@ const nft_Schema = new mongoose.Schema({
     lowercase: true,
     trim: true
   },
-  Supply: {
+  supply: {
     type: Number,
     require: true,
     trim: true
   },
-  Blockchain: {
+  blockchain: {
     type: String,
     lowercase: true,
     trim: true,
     require: true
   },
-  Collection:
-    String,
+   nftcollection:String,
 
-  Externallink: {
+  externallink: {
     type: String,
   },
 
@@ -31,13 +31,15 @@ const nft_Schema = new mongoose.Schema({
     lowercase: true,
     trim: true
   },
-  
+  amount:Number,
+  transactionHash:String,
 
-  Description: String,
+  description: String,
 
-  Imagehash: String,
-  Thumbnailhash: String,
-  bidding:Array
+  videohash: String,
+  thumbnailhash: String,
+  tokenId:Number,
+
 
 });
 

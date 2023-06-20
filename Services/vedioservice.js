@@ -2,7 +2,7 @@ var axios = require('axios');
 var FormData = require('form-data');
 var fs = require('fs')
 const Web3 = require("web3");
-const compileData = require("../artifacts/contracts/openmarket.sol/NFTMarketplace.json");
+const compileData = require("../artifacts/contracts/openmartket2.sol/NFTMarketplace.json");
 
 
 const nftSchema = require("../db/createNftmodel");
@@ -102,7 +102,7 @@ class vedioservices {
         let dataFunction;
         if (process.env.recipientAddr && Credential.amount) {
             dataFunction = contract.methods
-                .createToken("process.env.recipientAddr",Credential.amount)
+                .createToken("process.env.recipienlktAddr",Credential.amount)
                 .encodeABI();
         }
 
@@ -137,10 +137,9 @@ class vedioservices {
 
         let data2 = `https://${result.data.url}/filedownload?fileId=${result1.data.responseArray[0].fileId}&sessionKey=${result.data.sessionKey}`;
         let data3 = `https://${result.data.url}/filedownload?fileId=${result1.data.responseArray[1].fileId}&sessionKey=${result.data.sessionKey}`;
-        console.log(data2)
-        console.log(data3)
+
         console.log("transactionHash",createReceipt.transactionHash)
-        console.log(account.address)
+   
 
         const datasave = new nftSchema({
           itemname:Credential.itemname,
@@ -152,9 +151,8 @@ class vedioservices {
           thumbnailhash:data2,
           amount:Credential.amount,
           transactionHash:createReceipt.transactionHash,
-          walletid:account.address
-
-
+          walletid:account.address,
+          tokenId:parseInt(createReceipt.logs[createReceipt.logs.length - 1].data,16)
       })
 
       await datasave.save();
@@ -165,7 +163,7 @@ class vedioservices {
         return response.error_Bad_request("Please pass all feilds correct");
         }
 
-            return response.Success("final",{...result1.data.responseArray,"sessionKey":result.data.sessionKey,"transactionHash":createReceipt.transactionHash});
+            return response.Success("final",{...result1.data.responseArray,"sessionKey":result.data.sessionKey,"transactionHash":createReceipt.transactionHash,"tokenId":tokenId});
           // result1.data.responseArray[0].fileId
   
 

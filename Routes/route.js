@@ -40,6 +40,14 @@ route.post('/userFollow', authMiddleware.userAuthanticationMiddleware, Controlle
 route.post('/userUnFollow', authMiddleware.userAuthanticationMiddleware, Controller.userUnFollow);
 route.post('/totaluserFollowers', authMiddleware.userAuthanticationMiddleware, controller.CountUserFollowers);
 route.get('/getprofileDetails', authMiddleware.userAuthanticationMiddleware, Controller.getprofileDetails)
+route.post('/directSale',  Controller.directSale);
+route.get('/getNFTpreview',Controller.getNFTpreview)
+
+
+
+
+
+
 
 module.exports = route;
 
