@@ -33,7 +33,7 @@ class vedioservices {
             "securityKey": "public"
         },
         })
-        console.log("rtPr upload result", result.data)
+        // .console.log("rtPr upload result", result.data)
       //  axios(result)
         if (result && result.data && result.data.url) {
           let data1 = `https://${result.data.url}/fileupload`;          
@@ -153,6 +153,7 @@ class vedioservices {
           transactionHash:createReceipt.transactionHash,
           walletid:account.address,
           tokenId:parseInt(createReceipt.logs[createReceipt.logs.length - 1].data,16)
+          
       })
 
       await datasave.save();
@@ -163,7 +164,7 @@ class vedioservices {
         return response.error_Bad_request("Please pass all feilds correct");
         }
 
-            return response.Success("final",{...result1.data.responseArray,"sessionKey":result.data.sessionKey,"transactionHash":createReceipt.transactionHash,"tokenId":tokenId});
+            return response.Success("final",{...result1.data.responseArray,"sessionKey":result.data.sessionKey,"transactionHash":createReceipt.transactionHash,"tokenId":datasave.tokenId});
           // result1.data.responseArray[0].fileId
   
 

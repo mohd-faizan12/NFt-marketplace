@@ -222,7 +222,7 @@ async getNFTpreview(Credential) {
 
 
 
-//-------------------------------------------------------------------------
+//----------------------------------------------------------------------------------
 
 
 
@@ -311,10 +311,6 @@ return res
   return response.error_Bad_request("something went wrong", err);
 }
 }
-
-
-
-
 
     /**
      * @author vishal mendiratta
