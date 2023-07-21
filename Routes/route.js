@@ -17,6 +17,7 @@ const uploadFile = upload.fields([{
     name: "thumbnail", maxCount: 1
 
 }])
+// route.post('/user_registration', Controller.user_registration);
 route.post('/userlogin', Controller.userLogin);
 route.post('/walletconnect', Controller.walletConnect);
 route.post('/uploadprofile', authMiddleware.userAuthanticationMiddleware, Controller.uploadProfile);
@@ -43,9 +44,10 @@ route.get('/getprofileDetails', authMiddleware.userAuthanticationMiddleware, Con
 route.post('/directSale',  Controller.directSale);
 route.get('/getNFTpreview',Controller.getNFTpreview)
 
-
-
-
+route.get('/latest-drops',nftcontroller.Latest_Drop); //done
+route.get('/top-creaters',nftcontroller.top_Creaters); //done
+route.get('/top-collection',nftcontroller.top_Collection); 
+route.get('/getall-nft',nftcontroller.getAll_Nft); //done
 
 
 

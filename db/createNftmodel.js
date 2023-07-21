@@ -7,40 +7,52 @@ const nft_Schema = new mongoose.Schema({
     require: true,
     unique: true,
     lowercase: true,
-    trim: true
+    trim: true,
   },
   supply: {
     type: Number,
     require: true,
-    trim: true
+    trim: true,
   },
   blockchain: {
     type: String,
     lowercase: true,
     trim: true,
-    require: true
+    require: true,
   },
-   nftcollection:String,
+  nftcollection: String,
 
   externallink: {
     type: String,
   },
 
-  walletid:{
+  walletid: {
     type: String,
     lowercase: true,
-    trim: true
+    trim: true,
   },
-  amount:Number,
-  transactionHash:String,
+  amount: Number,
+  transactionHash: String,
 
   description: String,
 
   videohash: String,
   thumbnailhash: String,
-  tokenId:Number,
-
-
+  tokenId: Number,
+  Creator: {
+    type: String,
+    lowercase: true,
+    trim: true,
+  },
+  email: {
+    type: String,
+    lowercase: true,
+    trim: true,
+  },
+  created_at: {
+    type: Date,
+    default: new Date(),
+  },
 });
 
 module.exports = mongoose.model("createNft", nft_Schema);
