@@ -1,13 +1,9 @@
-
 // const fs = require("fs");
-const nftservices = require("../Services/nftservice")
-const userServices = require("../Services/userservices")
-const vedioServices = require("../Services/vedioservice")
+const nftservices = require("../Services/nftservice");
+const userServices = require("../Services/userservices");
+const vedioServices = require("../Services/vedioservice");
 // const createModulerLogger = require("../LoggerServices/loggerservices");
 // const logger = createModulerLogger("Controller")
-
-
-
 
 class Controller {
   
@@ -179,4 +175,4 @@ class Controller {
 
 
 }
-module.exports = new Controller;
+module.exports = new Controller();

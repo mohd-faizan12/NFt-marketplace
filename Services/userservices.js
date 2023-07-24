@@ -7,16 +7,13 @@ const { createModulerLogger } = require("../LoggerServices/loggerservices");
 const { error } = require("winston");
 const logger = createModulerLogger("userServices");
 //const authUsermodel = require("../db/authUsermodel")
-
+const authUsermodel = require("../db/authUsermodel");
+const jwt = require("jsonwebtoken");
 const Jwtkey = require("../utilities/jwtutilis");
+
 const userfollowers = require("../db/userFollowings");
 const user = require("../db/user");
-const authUsermodel = require("../db/authUsermodel")
-const jwt = require("jsonwebtoken");
-const createNftmodel = require("../db/createNftmodel")
-const emailServices = require("../utilities/Emailservices");
-const emailSubjects = require("../utilities/emailSubject");
-const path = require("path");
+
 
 
 class userServices {
@@ -396,48 +393,52 @@ class userServices {
   }
 
   async uploadProfile(Credential, authHeader) {
-    let finfdb = await user.exists({ username: Credential.username, email: Credential.email });
+    let finfdb = await user.exists({
+      username: Credential.username,
+      email: Credential.email,
+    });
     if (finfdb) {
-      return response.Unauthorized_response("Profile allready exist with given  username and emailAddress !!");
+      return response.Unauthorized_response(
+        "Profile allready exist with given  username and emailAddress !!"
+      );
     }
     try {
       Credential.password = Credential.password = bcrypt.hashSync(
         Credential.password,
         bcrypt.genSaltSync()
-
       );
 
-
-      const token = authHeader && authHeader.split(' ')[1];
+      const token = authHeader && authHeader.split(" ")[1];
       const decodedPayload = jwt.decode(token);
 
-
-      const walletfind = await user.findOne({ walletid: decodedPayload.walletid.toLowerCase() })
+      const walletfind = await user.findOne({
+        walletid: decodedPayload.walletid.toLowerCase(),
+      });
       if (!walletfind) {
         return response.Not_Found_Error("Invalid request: wallet not Exist");
       }
 
-      const updatedata = await user.updateOne({ walletid: decodedPayload.walletid }, {
-        $set: {
-          fullname: Credential.fullname,
-          email: Credential.email,
-          username: Credential.username,
-          bio: Credential.bio,
-          password: Credential.password,
-          discord: Credential.discord,
-          twitter: Credential.twitter
+      const updatedata = await user.updateOne(
+        { walletid: decodedPayload.walletid },
+        {
+          $set: {
+            fullname: Credential.fullname,
+            email: Credential.email,
+            username: Credential.username,
+            bio: Credential.bio,
+            password: Credential.password,
+            discord: Credential.discord,
+            twitter: Credential.twitter,
+          },
         }
-      })
-
+      );
 
       return response.Success("Profile  is successfully added");
-
     } catch (err) {
-
-      logger.error("data could not be updated")
+      logger.error("data could not be updated");
       return response.error_Bad_request("data could not be updated", err);
     }
-  } 
+  }
 
   async userFollow(objId, targetUserId) {
     try {
@@ -464,19 +465,20 @@ class userServices {
       return response.error_Bad_request("Internal server error", error);
     }
   }
+
   async userUnFollow(objId, targetUserId) {
     try {
+      const deletedata = await userfollowers.findOneAndDelete({
+        follower: objId,
+        followee: targetUserId,
+      });
 
-
-
-      const deletedata = await userfollowers.findOneAndDelete({ follower: objId, followee: targetUserId });
-
-
-      logger.info(`200:User is now unfollwing ${targetUserId} `)
-      return response.Success({ message: `User ${objId} is now  Unfollowing  ${targetUserId} ` });
+      logger.info(`200:User is now unfollwing ${targetUserId} `);
+      return response.Success({
+        message: `User ${objId} is now  Unfollowing  ${targetUserId} `,
+      });
     } catch (error) {
-     
-      logger.error(`500:message:data could not be updated`)
+      logger.error(`500:message:data could not be updated`);
       return response.error_Bad_request("Internal server error", error);
     }
   }
@@ -484,34 +486,99 @@ class userServices {
     try {
       const result = await userfollowers.find({ followee: userId }).count();
       const results = await userfollowers.find({ follower: userId }).count();
-      logger.info(`200:total no. of Follwers  ${result} ,total no of followee ${results}`)
-      return response.Success({ message: `Total number of Followers  ${result} ,Total number of followee ${results}`, followers: result, followee: results });
-
+      logger.info(
+        `200:total no. of Follwers  ${result} ,total no of followee ${results}`
+      );
+      return response.Success({
+        message: `Total number of Followers  ${result} ,Total number of followee ${results}`,
+        followers: result,
+        followee: results,
+      });
     } catch (error) {
-
-      logger.error(`500:Internal server error`)
+      logger.error(`500:Internal server error`);
       return response.error_Bad_request("Internal server error");
     }
   }
   async GetprofileDetails(pageNumber, limit, authHeader) {
     try {
-
       const gettoken = authHeader.substr(7);
-      const data = await user.findOne({ jwttoken: gettoken },{jwttoken:0,__v:0}).skip(limit * pageNumber).limit(limit).sort({ time: 1 })
+      const data = await user
+        .findOne({ jwttoken: gettoken }, { jwttoken: 0, __v: 0 })
+        .skip(limit * pageNumber)
+        .limit(limit)
+        .sort({ time: 1 });
       if (!data) {
-        logger.error(`500:Data not found on db`)
-        response.Not_Found_Error({ message: "Data not found on db" })
+        logger.error(`500:Data not found on db`);
+        response.Not_Found_Error({ message: "Data not found on db" });
       }
-      logger.info(`200:profile details  is successfully get`)
-      return response.Success({ message: "profile details  is successfully get", data: data })
-
+      logger.info(`200:profile details  is successfully get`);
+      return response.Success({
+        message: "profile details  is successfully get",
+        data: data,
+      });
     } catch (error) {
-      logger.error(`500:Something went to wrong`)
-      return response.error_Bad_request({ message: "Something went to wrong " })
+      logger.error(`500:Something went to wrong`);
+      return response.error_Bad_request({
+        message: "Something went to wrong ",
+      });
     }
-
   }
+
+  // async user_registration(Credential) {
+  //   try {
+  //     if (!Credential.email || !Credential.password) {
+  //       return response.Unauthorized_response(
+  //         "please Don't leave any empty fields "
+  //       );
+  //     }
+  //     const findEmail = await userschema.findOne({ email: Credential.email });
+  //     if (findEmail) {
+  //       return response.Unauthorized_response(
+  //         "Email Address is Already exist try another one !! "
+  //       );
+  //     }
+  //     Credential.password = bcrypt.hashSync(
+  //       Credential.password,
+  //       bcrypt.genSaltSync(10)
+  //     );
+
+  //     let results = Credential.email;
+
+  //     let val = Math.floor(1000 + Math.random() * 9000);
+  //     const data = new userschema({
+  //       email: Credential.email,
+  //       password: Credential.password,
+  //       fullname: Credential.fullname,
+  //       otp: val,
+  //     });
+  //     await data.save();
+  //     let emailStatus = await emailServices.sendTestMail(
+  //       Credential,
+  //       path.join(__dirname, "../Tem/user-index.html"),
+  //       {
+  //         val,
+  //         Credential,
+  //       },
+  //       emailSubjects.VERIFICATION_OTP
+  //     );
+  //     if (emailStatus) {
+  //       return response.Success("OTP sent to mail for registeration");
+  //     } else {
+  //       await userschema.deleteOne({ email: Credential.email });
+  //       return response.error_Bad_request(
+  //         "Something went wrong while sending email"
+  //       );
+  //     }
+  //   } catch (error) {
+  //     console.log("error", error);
+  //     return response.error_Bad_request("Something wents to wrong ");
+  //   }
+  // }
+
+
+
 
 
 }
+
 module.exports = new userServices();

@@ -6,25 +6,23 @@ const Collection_Schema = new mongoose.Schema({
     require: true,
     unique: true,
     lowercase: true,
-    trim: true
+    trim: true,
   },
   url: {
     type: String,
     require: true,
-    trim: true
+    trim: true,
   },
   links: {
     // type:Object
     website: String,
     medium: String,
     telegram: String,
-
-
   },
   creatorearnings: {
     type: String,
     lowercase: true,
-    trim: true
+    trim: true,
   },
   Blockchain: {
     type: String,
@@ -35,7 +33,7 @@ const Collection_Schema = new mongoose.Schema({
   paymenttoken: String,
   Category: {
     type: Array,
-  }
+  },
   // type: Array,
 
   // validate: (value) => {
@@ -44,12 +42,14 @@ const Collection_Schema = new mongoose.Schema({
   // trim: true,
   // lowercase: true,
 
-
   // Category : [{
   //   lat : String,
   //   lng : String
-  //    }]
-
+  //    }]                                                                
+  createdAt: {
+    type: Date,
+    default: new Date(),
+  },
 });
 
 module.exports = mongoose.model("CollectionNft", Collection_Schema);

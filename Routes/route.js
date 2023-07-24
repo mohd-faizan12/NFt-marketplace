@@ -51,9 +51,10 @@ route.get('/getprofileDetails', authMiddleware.userAuthanticationMiddleware, Con
 route.post('/directSale',  Controller.directSale);
 route.get('/getNFTpreview',Controller.getNFTpreview)
 
-
-
-
+route.get('/latest-drops',nftcontroller.Latest_Drop); //done
+route.get('/top-creaters',nftcontroller.top_Creaters); //done
+route.get('/top-collection',nftcontroller.top_Collection); 
+route.get('/getall-nft',nftcontroller.getAll_Nft); //done
 
 
 
