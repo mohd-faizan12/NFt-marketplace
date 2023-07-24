@@ -1,12 +1,13 @@
 const mongoose = require("mongoose");
 const { create } = require("./userFollowings");
+const { string } = require("hardhat/internal/core/params/argumentTypes");
 
 const userSchema = new mongoose.Schema({
-walletid:{
-  type: String,
-  lowercase: true,
-  trim: true
-},
+  walletid: {
+    type: String,
+    lowercase: true,
+    trim: true
+  },
   isverified: {
     type: Boolean,
     default: false
@@ -21,7 +22,7 @@ walletid:{
     type: String,
     lowercase: true,
     trim: true
-    
+
   },
   username: {
     type: String,
@@ -45,11 +46,30 @@ walletid:{
   timestamp: {
     type: Date,
     default: new Date()
-},
-jwttoken: {
-  type: String,
-  default: ''
-}
+  },
+  jwttoken: {
+    type: String,
+
+  },
+  otp: {
+    type: String,
+  },
+  otp1: {
+    type: String,
+  },
+  IsOtpVerified: {
+    type: Boolean,
+  },
+  IsOtpVerified2: {
+    type: Boolean,
+  },
+
+  walletverified: {
+    type: Boolean,
+  },
+  iteam:{
+    
+  }
 
 
 

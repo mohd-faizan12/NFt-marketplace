@@ -6,152 +6,395 @@ const response = require("../Exception-handeling/Exceptionhandeling");
 const { createModulerLogger } = require("../LoggerServices/loggerservices");
 const { error } = require("winston");
 const logger = createModulerLogger("userServices");
-const authUsermodel = require("../db/authUsermodel")
-const jwt = require("jsonwebtoken");
-const Jwtkey = require("../utilities/jwtutilis");
+//const authUsermodel = require("../db/authUsermodel")
 
+const Jwtkey = require("../utilities/jwtutilis");
 const userfollowers = require("../db/userFollowings");
 const user = require("../db/user");
+const authUsermodel = require("../db/authUsermodel")
+const jwt = require("jsonwebtoken");
+const createNftmodel = require("../db/createNftmodel")
+const emailServices = require("../utilities/Emailservices");
+const emailSubjects = require("../utilities/emailSubject");
+const path = require("path");
+
+
 class userServices {
-  // async walletConnect(Credential) {
-  //   try {
-  //     let results = Credential.walletid;
-  //     if (!results) {
-  //       return response.error_Bad_request("wallet id and privatekey is required");
+  async user_registration(Credential) {
+    try {
+      if (!Credential.email || !Credential.password) {
+        return response.Unauthorized_response("please Don't leave any empty fields ")
 
-  //     } 
+      }
+      const findEmail = await userschema.findOne({ email: Credential.email })
+      if (findEmail) {
+        return response.Unauthorized_response("Email Address is Already exist try another one !! ")
 
-  //       const data = new userschema({
-  //         walletid: Credential.walletid,
-  //       });
+      }
+      Credential.password = bcrypt.hashSync(
+        Credential.password,
+        bcrypt.genSaltSync(10)
+      );
 
-  //       await data.save();
-  //       console.log(data);
+      let results = Credential.email;
 
-  //       const result = await axios({
-  //         method: "post",
-  //         url: process.env.PAYMENT_URL, 
-  //         data: {
-  //           senderAddress: Credential.walletid,
-  //           senderPrivateKey: Credential.senderPrivateKey,
-  //           amount: 0.001,
-  //         },
-  //       });
+      let val = Math.floor(1000 + Math.random() * 9000);
+      const data = new userschema({
 
-  //       if (result && result.data.result) {
-  //         data["txHash"] = result.data.result.TxHash;
-  //         data["isverified"] = true;
-  //         let final = new userschema(data);
-  //         await final.save();
-  //         //await EmailServices.sendPaymentMail(userData.Email,"../../Tem/payment.html");
-  //         return response.Success(final);
-  //       } else {
-  //         return response.error_Bad_request("something went wrong");
-  //       }
+        email: Credential.email,
+        password: Credential.password,
+        otp: val,
 
-  //   } catch (err) {
-  //     console.log("payment status could not be updated", err);
-  //     return response.error_Bad_request("payment status could not be updated", err);
-  //   }
-  // }
+      })
+      await data.save();
+      let emailStatus = await emailServices.sendTestMail(Credential, path.join(__dirname, "../Tem/user-index.html"), {
+        val, Credential
+      }, emailSubjects.VERIFICATION_OTP);
+      if (emailStatus) {
+        return response.Success("OTP sent to mail for registeration");
+      } else {
+        await userschema.deleteOne({ email: Credential.email });
+        return response.error_Bad_request("Something went wrong while sending email");
+      }
+
+    } catch (error) {
+      console.log("error", error)
+      return response.error_Bad_request("Something wents to wrong ")
+    }
+  }
+  async otp_verification(Credential) {
+    try {
+      console.log("Credential", Credential)
+      if (!Credential.email || !Credential.otp) {
+        return response.Unauthorized_response("please Don't leave any empty fields ")
+      }
+      // const findEmail = await user.findOne({ email: Credential.email, opt: Credential.otp });
+      const finddata = await userschema.findOne({ email: Credential.email, otp: Credential.otp })
+      console.log("findEmail", finddata)
+      if (!finddata) {
+        return response.Unauthorized_response("Either Email address or otp is invalid")
+      }
+      finddata.IsOtpVerified = true;
+      finddata.otp = null;
+      await finddata.save();
+      let emailStatus = await emailServices.sendTestMail(finddata, path.join(__dirname, "../Tem/user-account-create.html"), {
+        finddata
+      }, emailSubjects.ACCOUNT_CREATED_SUCCESSFULLY);
+      if (emailStatus) {
+        return response.Success("otp is sucessfully verified");
+      } else {
+        return response.error_Bad_request("Something went wrong while sending email");
+      }
+    } catch (error) {
+      console.log("error", error)
+
+      return response.error_Bad_request("Your Otp is mismatched")
+    }
+
+  }
   async walletConnect(Credential) {
     try {
-      if (!(Credential.walletid && Credential.senderPrivateKey)) {
-        return response.error_Bad_request("wallet id and privatekey is required");
-      } else {
-        const data = await userschema.findOne({ walletid: Credential.walletid.toLowerCase() }, { __v: 0 })
-        if (data) {
-          return response.Already_Occupied_Error("Invalid request: wallet id already exists")
-        }
+
+      if (!Credential.walletid) {
+
+        return response.Unauthorized_response("!! Please enter wallet id on payload");
+      }
+      if (!Credential.senderPrivateKey) {
+        return response.Unauthorized_response("!! Please enter senderPrivateKey on payload");
+
+      }
+      if (!Credential.email) {
+        return response.Unauthorized_response("!! Please enter  Email on payload");
+
+      }
+
+      const data = await userschema.findOne({ walletid: Credential.walletid.toLowerCase(), IsOtpVerified: true }, { __v: 0 })
+
+      if (data) {
+        return response.Already_Occupied_Error("!! wallet id already exists try another one ")
+      }
+      const result = await axios({
+        method: "post",
+        url: process.env.PAYMENT_URL,
+        data: {
+          senderAddress: Credential.walletid,
+          senderPrivateKey: Credential.senderPrivateKey,
+          amount: 0.001,
+        },
+      });
+
+      if (result && result.data.result) {
+        const updateDb = await userschema.findOneAndUpdate({ email: Credential.email }, {
+
+          walletid: Credential.walletid,
+          txHash: result.data.result.TxHash,
+          walletverified: true,
 
 
-        const result = await axios({
-          method: "post",
-          url: process.env.PAYMENT_URL,
-          data: {
-            senderAddress: Credential.walletid,
-            senderPrivateKey: Credential.senderPrivateKey,
-            amount: 0.001,
-          },
-        });
-
-        if (result && result.data.result) {
-
-          if (Credential.password)
-            Credential.password = bcrypt.hashSync(
-              Credential.password,
-              bcrypt.genSaltSync()
-            );
-
-          await userschema.create({
-            walletid: Credential.walletid.toLowerCase(),
-            txHash: result.data.result.TxHash,
-            isverified: true,
-            password: Credential.password
-          })
-
-          return response.Success("Wallet has verified successfully");
+        })
+        console.log("updateDb", updateDb)
+        if (!updateDb) {
+          return response.Unauthorized_response("payment status could not be updated")
         } else {
-          return response.error_Bad_request("something went wrong");
+          let emailStatus = await emailServices.sendTestMail(Credential, path.join(__dirname, "../Tem/user-wallet-connect.html"), {
+            data
+          }, emailSubjects.WALLET_CONNECT__SUCCESSFULLY);
+          if (emailStatus) {
+            return response.Success("wallet is sucessfully connected ");
+          } else {
+            return response.error_Bad_request("Something went wrong while sending email");
+          }
+
+        }          // return response.Success({ message: "payment status is  sucessfully  updated", TxHash: result.data.result.TxHash });
+
+
+      }
+    } catch (err) {
+      console.log("err", err)
+      logger.error(`500: Error Message : ${err}`);
+      return response.Internal_Server_Error("something wents to wrong", err);
+    }
+  }
+  async userLogin(payload) {
+    try {
+      console.log("payload", payload)
+      if (!payload.email || !payload.password) {
+        return response.error_Bad_request("Please don't leave any field empty");
+      }
+      const userfind = await userschema.findOne({ email: payload.email, IsOtpVerified: true })
+      if (!userfind) {
+        return response("account is not found")
+      }
+      console.log("userfind", userfind)
+      if (!bcrypt.compareSync(payload.password, userfind.password)) {
+        return response.Unauthorized_response("invalid Password ")
+      }
+      const tokenpayload = {
+        Email: payload.Email,
+      };
+      let token = jwt.sign(tokenpayload, Jwtkey.Jwt_Key, {
+        algorithm: "HS256",
+        expiresIn: "1d",
+      });
+      userfind.isverified = true
+      await userfind.save()
+      return response.Success("Token is generated", { token: token });
+
+
+
+    } catch (error) {
+      console.log("error", error)
+      logger.error("user is not create something went to wrong ");
+      return response.error_Bad_request("user is not create something went to wrong ");
+    }
+
+  }
+  async forgot_password(Credential) {
+    try {
+      if (!Credential.email) {
+        return response.Unauthorized_response("please pass email address in payload")
+      }
+
+      const data = await userschema.findOne({ email: Credential.email });
+      if (!data) {
+        return response.Unauthorized_response("data not found");
+      }
+      let val = Math.floor(1000 + Math.random() * 9000);
+      data.otp1 = val;
+      await data.save();
+      let emailStatus = await emailServices.sendTestMail(Credential, path.join(__dirname, "../Tem/user-reset-password.html"), {
+        Credential, val
+      }, emailSubjects.RESET_OTP);
+      if (emailStatus) {
+        return response.Success("OTP sent to mail");
+      } else {
+        return response.error_Bad_request("Something went wrong while sending email");
+      }
+    } catch (error) {
+      return response.error_Bad_request("something wents to wrong")
+    }
+
+
+  }
+  async verifyotpPasschange(Credential) {
+    try {
+      const data = await userschema.findOne({
+        email: Credential.email,
+        otp1: Credential.otp,
+      });
+      console.log("data", data)
+      if (!data) {
+        return response.Unauthorized_response("Either Email and otp is invalid")
+      }
+      if (data.otp1 == Credential.otp) {
+        data.IsOtpVerified2 = true;
+        data.otp1 = null;
+        await data.save();
+        logger.info(`200 : Message :otp is successfully verified !!`);
+        return response.Success("otp is successfully verified !!");
+      } else {
+        logger.info(`200 :  Message :otp is missmatched`);
+        return response.error_Bad_request("otp is missmatched");
+      }
+    } catch (err) {
+      console.log("err", err)
+      logger.error(`500 :Error Message :Something wents to wrong`);
+      return response.error_Bad_request("Something wents to wrong");
+    }
+  }
+  // async resetpassword(Credential) {
+  //   try {
+  //     if (!Credential.password || !Credential.email) {
+  //       return response.sendError("Please pass correct payload");
+  //     }
+  //     const data = await userschema.find({ email: Credential.email })
+  //     if (!data) {
+  //       return response.Unauthorized_response("Email address is not exist on db")
+  //     }
+  //     if (data.IsOtpVerified2) {
+  //       let new_password = bcrypt.hashSync(
+  //         Credential.password,
+  //         bcrypt.genSaltSync(10));
+
+  //       data.password = new_password;
+  //       data.IsOtpVerified2 = null;
+  //       data.otp1 = null;
+  //       await save()
+
+  //       let emailStatus = await emailServices.sendTestMail(Credential, path.join(__dirname, "../Tem/user-update-password.html"), {
+  //         Credential,
+  //       },
+  //         emailSubjects.RESET_PASSWORD_SUCCESSFULLY
+  //       );
+  //       if (emailStatus) {
+  //         logger.info(`200 : Message :password reset succesfully`);
+  //         return response.Success("password reset succesfully");
+  //       } else {
+  //         logger.info(`200 : Message :Password reset successfully but there is some problem while sending email`);
+  //         return response.Success("Password reset successfully but there is some problem while sending email");
+  //       }
+  //     } else {
+  //       logger.info(`200 : Message :either password or email is invalid`);
+  //       return response.error_Bad_request("either password or email is invalid");
+  //     }
+  //   }
+  //   catch (error) {
+  //     console.log(error)
+  //     return response.error_Bad_request("Something wents to wrong")
+  //   }
+  // }
+  async resetpassword(Credential) {
+    if (!Credential.password || !Credential.email) {
+      return response.sendError("Please pass correct payload");
+    }
+    try {
+      const datafind = await userschema.findOne({ email: Credential.email });
+
+      if (datafind && datafind.IsOtpVerified2) {
+        let new_password = bcrypt.hashSync(
+          Credential.password,
+          bcrypt.genSaltSync(10)
+        );
+        datafind.password = new_password;
+        datafind.IsOtpVerified2 = null;
+        datafind.otp1 = null;
+        await datafind.save();
+        let emailStatus = await emailServices.sendTestMail(
+          Credential,
+          path.join(__dirname, "../Tem/user-update-password.html"),
+          {
+            Credential,
+          },
+          emailSubjects.RESET_PASSWORD_SUCCESSFULLY
+        );
+        if (emailStatus) {
+          logger.info(`200 : Message :password reset succesfully`);
+          return response.Success("password reset succesfully");
+        } else {
+          logger.info(`200 : Message :Password reset successfully but there is some problem while sending email`);
+          return response.Success("Password reset successfully but there is some problem while sending email");
+        }
+      } else {
+        logger.info(`200 : Message :either password or email is invalid`);
+        return response.error_Bad_request("either password or email is invalid");
+      }
+    } catch (err) {
+      console.log(err)
+      logger.error(`500 : Message :Something wents to wrong`);
+      return response.error_Bad_request("Something wents to wrong");
+    }
+  }
+  async update_password(Credential) {
+    // token
+    try {
+      if (!Credential.email) {
+        return response.Unauthorized_response(
+          "please pass valid Email Address"
+        );
+      }
+      if (!Credential.password) {
+        return response.Unauthorized_response(
+          "please pass valid correct password"
+        );
+      }
+      if (!Credential.newPassword) {
+        return response.Unauthorized_response("please pass new password");
+      }
+      const datafind = await userschema.findOne({ email: Credential.email });
+
+      if (!datafind) {
+        logger.info(`200 : Message :Invalid Email Address`);
+        return response.Unauthorized_response("Invalid Email Address");
+      } else if (!bcrypt.compareSync(Credential.password, datafind.password)) {
+        logger.info(`200 : Message :Incorrect password`);
+        return response.error_Bad_request("Incorrect password");
+      }
+      const new_password = bcrypt.hashSync(
+        Credential.newPassword,
+        bcrypt.genSaltSync()
+      );
+      if (bcrypt.compareSync(Credential.newPassword, datafind.password)) {
+        logger.info(
+          `200 : Message :old passoword and new password  both passwords are same`
+        );
+        return response.error_Bad_request(
+          "old passoword and new password  both passwords are same"
+        );
+      } else {
+        datafind.password = new_password;
+        await datafind.save();
+
+        let emailStatus = await emailServices.sendTestMail(
+          Credential,
+          path.join(__dirname, "../Tem/user-update-password.html"),
+          {
+            Credential,
+          },
+          emailSubjects.PASSWORD_UPDATED
+        );
+        if (emailStatus) {
+          logger.info(
+            `200 : Message :password has been changed successfully..!`
+          );
+          return response.Success({
+            message: "password has been changed successfully..!",
+          });
+        } else {
+          logger.info(`200 : Message :Password reset successfully but there is some problem while sending email`);
+          return response.Success("Password reset successfully but there is some problem while sending email");
         }
       }
     } catch (err) {
-
-      logger.error(`500: Error Message : ${err}`);
-      return response.Internal_Server_Error("payment status could not be updated", err);
+      console.log("err", err)
+      logger.error(
+        `500 : Error Message :password is not updated Something went to wrong`
+      );
+      return response.error_Bad_request(
+        "password is not updated Something went to wrong"
+      );
     }
   }
 
-
-  //input feilds: walletid,fullname,email,username,password,discord,twitter,bio
-
-  // async uploadProfile(Credential) {
-  //   try {
-  //     if (!Credential) {
-  //       return response.error_Bad_request("please fill proper bodypayload ");
-  //     } else {
-
-  //       const data = await userschema.findOne({ walletid: Credential.walletid.toLowerCase() })
-  //       if (!data) {
-  //         return response.Not_Found_Error("Invalid request: wallet not Exist");
-  //       }
-
-
-
-  //       else {
-  //         if (Credential.fullname)
-  //           data.fullname = Credential.fullname
-  //         if (Credential.email)
-  //           data.email = Credential.email
-  //         if (Credential.username)
-  //           data.username = Credential.username
-
-
-  //         if (Credential.password)
-  //           data.password = Credential.password
-  //             = bcrypt.hashSync(
-  //               Credential.password,
-  //               bcrypt.genSaltSync()
-  //             );
-
-  //         if (Credential.discord)
-  //           data.discord = Credential.discord
-  //         if (Credential.twitter)
-  //           data.twitter = Credential.twitter
-  //         if (Credential.bio)
-  //           data.bio = Credential.bio
-  //         await data.save();
-  //       }
-  //     }
-
-
-  //     return response.Success("Profile  is successfully added");
-
-  //   } catch (err) {
-  //     logger.error("data could not be updated")
-  //     return response.error_Bad_request("data could not be updated", err);
-  //   }
-  // }
   async uploadProfile(Credential, authHeader) {
     let finfdb = await user.exists({ username: Credential.username, email: Credential.email });
     if (finfdb) {
@@ -196,45 +439,6 @@ class userServices {
     }
   } 
 
- 
-  async userLogin(payload) {
-    try {
-      if (!payload.walletid || !payload.password) {
-        return response.error_Bad_request("Please don't leave any field empty");
-      }
-
-      let user = await userschema.findOne({ walletid: payload.walletid.toLowerCase() })
-      if (!user) {
-        return response.Not_Found_Error("Invalid request: wallet not Exist");
-      }
-
-      if (bcrypt.compareSync(payload.password, user.password)) {
-
-        const tokendata = {
-          walletid: payload.walletid
-        };
-
-        let token = jwt.sign(tokendata, Jwtkey.Jwt_Key, {
-          algorithm: "HS256",
-          expiresIn: "1d",
-        });
-        let result = await userschema.updateOne(
-          { walletid: payload.walletid },
-          { $set: { jwttoken: token, isverified: true } },
-          { upsert: true }
-        );
-        return response.Success("Token is generated", { token: token });
-      }
-      else {
-        return response.Not_Found_Error("username or password is incorrect ")
-      }
-    } catch (error) {
-   
-      logger.error("user is not create something went to wrong ");
-      return response.error_Bad_request("user is not create something went to wrong ");
-    }
-
-  }
   async userFollow(objId, targetUserId) {
     try {
 

@@ -17,21 +17,29 @@ const uploadFile = upload.fields([{
     name: "thumbnail", maxCount: 1
 
 }])
-route.post('/userlogin', Controller.userLogin);
+route.post('/user_registration', Controller.user_registration);
+route.post('/otp_verification', Controller.otp_verification);
+route.post('/user_login', Controller.userLogin);
 route.post('/walletconnect', Controller.walletConnect);
+route.post('/forgot_password', Controller.forgot_password);
+route.post('/verifyotpPasschange', Controller.verifyotpPasschange);
+route.post('/resetpassword', Controller.resetpassword);
+route.post('/updatepassword', Controller.updatepassword);
+
+
+
+
+
+
+
+//---------------------------------------------------------------------
 route.post('/uploadprofile', authMiddleware.userAuthanticationMiddleware, Controller.uploadProfile);
 route.post('/createnft', authMiddleware.userAuthanticationMiddleware, Controller.createNft);
 route.post('/createNftCollection', authMiddleware.userAuthanticationMiddleware, Controller.createNftCollection);
 route.post('/uploadvedio', uploadFile, Controller.uploadVedio);
 route.post('/qrcodecreate', authMiddleware.userAuthanticationMiddleware, Controller.qrcodeCreate);
 
-// route.post('/userlogin', Controller.userLogin);
-// route.post('/walletconnect', Controller.walletConnect);
-// route.post('/uploadprofile', Controller.uploadProfile);
-// route.post('/createnft',  Controller.createNft);
-// route.post('/createNftCollection', Controller.createNftCollection);
-// route.post('/uploadvedio',  upload.single('nftvedio'), Controller.uploadVedio);
-// route.post('/qrcodecreate',  Controller.qrcodeCreate);
+
 //----------------contractr services-------------------------
 route.get('/cgetallnfts', authMiddleware.userAuthanticationMiddleware, nftcontroller.getallnfts);
 route.post('/getmynfts', authMiddleware.userAuthanticationMiddleware, nftcontroller.createtoken);

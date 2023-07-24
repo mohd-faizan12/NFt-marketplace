@@ -10,17 +10,50 @@ const vedioServices = require("../Services/vedioservice")
 
 
 class Controller {
-    // async usersignupdetails(req, res) {
-    //     const Credential = req.body;
-    //     const result = await userservices.usersignupdetails(Credential);
-    //     res.status(result.status).json({ result });
-    // }
+  
+    async userLogin(req, res) {
+        const Credential = req.body;
+        const result = await userServices.userLogin(Credential);
+      
+        res.json({result})
 
+    }
+    async forgot_password(req, res) {
+        const Credential = req.body;
+        const result = await userServices.forgot_password(Credential);
+        res.json({result})
 
+    }
+    async verifyotpPasschange(req, res) {
+        const Credential = req.body;
+        const result = await userServices.verifyotpPasschange(Credential);
+        res.json({result})
+
+    }
+    async resetpassword(req, res) {
+        const Credential = req.body;
+        const result = await userServices.resetpassword(Credential);
+        res.json({result})
+
+    }
+    async user_registration(req, res) {
+        const Credential = req.body;
+        const result = await userServices.user_registration(Credential);
+        res.json({result});
+
+    }
+    async otp_verification(req, res) {
+        const Credential = req.body;
+        const result = await userServices.otp_verification(Credential);
+        res.json({result});
+
+    }
+ 
 
     async walletConnect(req, res) {
         const Credential = req.body;
-        const result = await userServices.walletConnect(Credential);
+        const authHeader = req.headers['authorization'];
+        const result = await userServices.walletConnect(Credential,authHeader);
         res.json({result})
 
     }
@@ -37,6 +70,12 @@ class Controller {
         const Credential = req.body;
         const result = await userServices.userLogin(Credential);
       
+        res.json({result})
+
+    }
+    async updatepassword(req, res) {
+        const Credential = req.body;
+        const result = await userServices.update_password(Credential);
         res.json({result})
 
     }
