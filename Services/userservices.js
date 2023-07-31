@@ -1,6 +1,7 @@
 const bcrypt = require("bcrypt");
 const userschema = require("../db/user");
 const axios = require("axios");
+const path = require("path");
 
 const response = require("../Exception-handeling/Exceptionhandeling");
 const { createModulerLogger } = require("../LoggerServices/loggerservices");
@@ -10,23 +11,24 @@ const logger = createModulerLogger("userServices");
 const authUsermodel = require("../db/authUsermodel");
 const jwt = require("jsonwebtoken");
 const Jwtkey = require("../utilities/jwtutilis");
-
+const emailServices = require("../utilities/Emailservices");
+const emailSubjects = require("../utilities/emailSubject");
 const userfollowers = require("../db/userFollowings");
 const user = require("../db/user");
-
-
 
 class userServices {
   async user_registration(Credential) {
     try {
       if (!Credential.email || !Credential.password) {
-        return response.Unauthorized_response("please Don't leave any empty fields ")
-
+        return response.Unauthorized_response(
+          "please Don't leave any empty fields "
+        );
       }
-      const findEmail = await userschema.findOne({ email: Credential.email })
+      const findEmail = await userschema.findOne({ email: Credential.email });
       if (findEmail) {
-        return response.Unauthorized_response("Email Address is Already exist try another one !! ")
-
+        return response.Unauthorized_response(
+          "Email Address is Already exist try another one !! "
+        );
       }
       Credential.password = bcrypt.hashSync(
         Credential.password,
@@ -37,78 +39,103 @@ class userServices {
 
       let val = Math.floor(1000 + Math.random() * 9000);
       const data = new userschema({
-
         email: Credential.email,
         password: Credential.password,
         otp: val,
-
-      })
+      });
       await data.save();
-      let emailStatus = await emailServices.sendTestMail(Credential, path.join(__dirname, "../Tem/user-index.html"), {
-        val, Credential
-      }, emailSubjects.VERIFICATION_OTP);
+      let emailStatus = await emailServices.sendTestMail(
+        Credential,
+        path.join(__dirname, "../Tem/user-index.html"),
+        {
+          val,
+          Credential,
+        },
+        emailSubjects.VERIFICATION_OTP
+      );
       if (emailStatus) {
         return response.Success("OTP sent to mail for registeration");
       } else {
         await userschema.deleteOne({ email: Credential.email });
-        return response.error_Bad_request("Something went wrong while sending email");
+        return response.error_Bad_request(
+          "Something went wrong while sending email"
+        );
       }
-
     } catch (error) {
-      console.log("error", error)
-      return response.error_Bad_request("Something wents to wrong ")
+      console.log("error", error);
+      return response.error_Bad_request("Something wents to wrong ");
     }
   }
   async otp_verification(Credential) {
     try {
-      console.log("Credential", Credential)
+      console.log("Credential", Credential);
       if (!Credential.email || !Credential.otp) {
-        return response.Unauthorized_response("please Don't leave any empty fields ")
+        return response.Unauthorized_response(
+          "please Don't leave any empty fields "
+        );
       }
       // const findEmail = await user.findOne({ email: Credential.email, opt: Credential.otp });
-      const finddata = await userschema.findOne({ email: Credential.email, otp: Credential.otp })
-      console.log("findEmail", finddata)
+      const finddata = await userschema.findOne({
+        email: Credential.email,
+        otp: Credential.otp,
+      });
+      console.log("findEmail", finddata);
       if (!finddata) {
-        return response.Unauthorized_response("Either Email address or otp is invalid")
+        return response.Unauthorized_response(
+          "Either Email address or otp is invalid"
+        );
       }
       finddata.IsOtpVerified = true;
       finddata.otp = null;
       await finddata.save();
-      let emailStatus = await emailServices.sendTestMail(finddata, path.join(__dirname, "../Tem/user-account-create.html"), {
-        finddata
-      }, emailSubjects.ACCOUNT_CREATED_SUCCESSFULLY);
+      let emailStatus = await emailServices.sendTestMail(
+        finddata,
+        path.join(__dirname, "../Tem/user-account-create.html"),
+        {
+          finddata,
+        },
+        emailSubjects.ACCOUNT_CREATED_SUCCESSFULLY
+      );
       if (emailStatus) {
         return response.Success("otp is sucessfully verified");
       } else {
-        return response.error_Bad_request("Something went wrong while sending email");
+        return response.error_Bad_request(
+          "Something went wrong while sending email"
+        );
       }
     } catch (error) {
-      console.log("error", error)
+      console.log("error", error);
 
-      return response.error_Bad_request("Your Otp is mismatched")
+      return response.error_Bad_request("Your Otp is mismatched");
     }
-
   }
   async walletConnect(Credential) {
     try {
-
       if (!Credential.walletid) {
-
-        return response.Unauthorized_response("!! Please enter wallet id on payload");
+        return response.Unauthorized_response(
+          "!! Please enter wallet id on payload"
+        );
       }
       if (!Credential.senderPrivateKey) {
-        return response.Unauthorized_response("!! Please enter senderPrivateKey on payload");
-
+        return response.Unauthorized_response(
+          "!! Please enter senderPrivateKey on payload"
+        );
       }
       if (!Credential.email) {
-        return response.Unauthorized_response("!! Please enter  Email on payload");
-
+        return response.Unauthorized_response(
+          "!! Please enter  Email on payload"
+        );
       }
 
-      const data = await userschema.findOne({ walletid: Credential.walletid.toLowerCase(), IsOtpVerified: true }, { __v: 0 })
+      const data = await userschema.findOne(
+        { walletid: Credential.walletid.toLowerCase(), IsOtpVerified: true },
+        { __v: 0 }
+      );
 
       if (data) {
-        return response.Already_Occupied_Error("!! wallet id already exists try another one ")
+        return response.Already_Occupied_Error(
+          "!! wallet id already exists try another one "
+        );
       }
       const result = await axios({
         method: "post",
@@ -121,50 +148,59 @@ class userServices {
       });
 
       if (result && result.data.result) {
-        const updateDb = await userschema.findOneAndUpdate({ email: Credential.email }, {
-
-          walletid: Credential.walletid,
-          txHash: result.data.result.TxHash,
-          walletverified: true,
-
-
-        })
-        console.log("updateDb", updateDb)
+        const updateDb = await userschema.findOneAndUpdate(
+          { email: Credential.email },
+          {
+            walletid: Credential.walletid,
+            txHash: result.data.result.TxHash,
+            walletverified: true,
+          }
+        );
+        console.log("updateDb", updateDb);
         if (!updateDb) {
-          return response.Unauthorized_response("payment status could not be updated")
+          return response.Unauthorized_response(
+            "payment status could not be updated"
+          );
         } else {
-          let emailStatus = await emailServices.sendTestMail(Credential, path.join(__dirname, "../Tem/user-wallet-connect.html"), {
-            data
-          }, emailSubjects.WALLET_CONNECT__SUCCESSFULLY);
+          let emailStatus = await emailServices.sendTestMail(
+            Credential,
+            path.join(__dirname, "../Tem/user-wallet-connect.html"),
+            {
+              data,
+            },
+            emailSubjects.WALLET_CONNECT__SUCCESSFULLY
+          );
           if (emailStatus) {
             return response.Success("wallet is sucessfully connected ");
           } else {
-            return response.error_Bad_request("Something went wrong while sending email");
+            return response.error_Bad_request(
+              "Something went wrong while sending email"
+            );
           }
-
-        }          // return response.Success({ message: "payment status is  sucessfully  updated", TxHash: result.data.result.TxHash });
-
-
+        } // return response.Success({ message: "payment status is  sucessfully  updated", TxHash: result.data.result.TxHash });
       }
     } catch (err) {
-      console.log("err", err)
+      console.log("err", err);
       logger.error(`500: Error Message : ${err}`);
       return response.Internal_Server_Error("something wents to wrong", err);
     }
   }
   async userLogin(payload) {
     try {
-      console.log("payload", payload)
+      console.log("payload", payload);
       if (!payload.email || !payload.password) {
         return response.error_Bad_request("Please don't leave any field empty");
       }
-      const userfind = await userschema.findOne({ email: payload.email, IsOtpVerified: true })
+      const userfind = await userschema.findOne({
+        email: payload.email,
+        IsOtpVerified: true,
+      });
       if (!userfind) {
-        return response("account is not found")
+        return response.error_Bad_request("account is not found");
       }
-      console.log("userfind", userfind)
+      console.log("userfind", userfind);
       if (!bcrypt.compareSync(payload.password, userfind.password)) {
-        return response.Unauthorized_response("invalid Password ")
+        return response.Unauthorized_response("invalid Password ");
       }
       const tokenpayload = {
         Email: payload.Email,
@@ -173,23 +209,24 @@ class userServices {
         algorithm: "HS256",
         expiresIn: "1d",
       });
-      userfind.isverified = true
-      await userfind.save()
+      userfind.isverified = true;
+      userfind.jwttoken = token;
+      await userfind.save();
       return response.Success("Token is generated", { token: token });
-
-
-
     } catch (error) {
-      console.log("error", error)
+      console.log("error", error);
       logger.error("user is not create something went to wrong ");
-      return response.error_Bad_request("user is not create something went to wrong ");
+      return response.error_Bad_request(
+        "user is not create something went to wrong "
+      );
     }
-
   }
   async forgot_password(Credential) {
     try {
       if (!Credential.email) {
-        return response.Unauthorized_response("please pass email address in payload")
+        return response.Unauthorized_response(
+          "please pass email address in payload"
+        );
       }
 
       const data = await userschema.findOne({ email: Credential.email });
@@ -199,19 +236,25 @@ class userServices {
       let val = Math.floor(1000 + Math.random() * 9000);
       data.otp1 = val;
       await data.save();
-      let emailStatus = await emailServices.sendTestMail(Credential, path.join(__dirname, "../Tem/user-reset-password.html"), {
-        Credential, val
-      }, emailSubjects.RESET_OTP);
+      let emailStatus = await emailServices.sendTestMail(
+        Credential,
+        path.join(__dirname, "../Tem/user-reset-password.html"),
+        {
+          Credential,
+          val,
+        },
+        emailSubjects.RESET_OTP
+      );
       if (emailStatus) {
         return response.Success("OTP sent to mail");
       } else {
-        return response.error_Bad_request("Something went wrong while sending email");
+        return response.error_Bad_request(
+          "Something went wrong while sending email"
+        );
       }
     } catch (error) {
-      return response.error_Bad_request("something wents to wrong")
+      return response.error_Bad_request("something wents to wrong");
     }
-
-
   }
   async verifyotpPasschange(Credential) {
     try {
@@ -219,9 +262,11 @@ class userServices {
         email: Credential.email,
         otp1: Credential.otp,
       });
-      console.log("data", data)
+      console.log("data", data);
       if (!data) {
-        return response.Unauthorized_response("Either Email and otp is invalid")
+        return response.Unauthorized_response(
+          "Either Email and otp is invalid"
+        );
       }
       if (data.otp1 == Credential.otp) {
         data.IsOtpVerified2 = true;
@@ -234,7 +279,7 @@ class userServices {
         return response.error_Bad_request("otp is missmatched");
       }
     } catch (err) {
-      console.log("err", err)
+      console.log("err", err);
       logger.error(`500 :Error Message :Something wents to wrong`);
       return response.error_Bad_request("Something wents to wrong");
     }
@@ -308,15 +353,21 @@ class userServices {
           logger.info(`200 : Message :password reset succesfully`);
           return response.Success("password reset succesfully");
         } else {
-          logger.info(`200 : Message :Password reset successfully but there is some problem while sending email`);
-          return response.Success("Password reset successfully but there is some problem while sending email");
+          logger.info(
+            `200 : Message :Password reset successfully but there is some problem while sending email`
+          );
+          return response.Success(
+            "Password reset successfully but there is some problem while sending email"
+          );
         }
       } else {
         logger.info(`200 : Message :either password or email is invalid`);
-        return response.error_Bad_request("either password or email is invalid");
+        return response.error_Bad_request(
+          "either password or email is invalid"
+        );
       }
     } catch (err) {
-      console.log(err)
+      console.log(err);
       logger.error(`500 : Message :Something wents to wrong`);
       return response.error_Bad_request("Something wents to wrong");
     }
@@ -377,12 +428,16 @@ class userServices {
             message: "password has been changed successfully..!",
           });
         } else {
-          logger.info(`200 : Message :Password reset successfully but there is some problem while sending email`);
-          return response.Success("Password reset successfully but there is some problem while sending email");
+          logger.info(
+            `200 : Message :Password reset successfully but there is some problem while sending email`
+          );
+          return response.Success(
+            "Password reset successfully but there is some problem while sending email"
+          );
         }
       }
     } catch (err) {
-      console.log("err", err)
+      console.log("err", err);
       logger.error(
         `500 : Error Message :password is not updated Something went to wrong`
       );
@@ -442,25 +497,27 @@ class userServices {
 
   async userFollow(objId, targetUserId) {
     try {
-
-
-      const findData = await userfollowers.find({ follower: objId, followee: targetUserId });
+      const findData = await userfollowers.find({
+        follower: objId,
+        followee: targetUserId,
+      });
 
       if (findData.length !== 0) {
-
-
-        return response.Success({ message: `User ${objId} is allready follow ${targetUserId} ` });
+        return response.Success({
+          message: `User ${objId} is allready follow ${targetUserId} `,
+        });
       }
       const doc = {
         follower: objId,
-        followee: targetUserId
-      }
+        followee: targetUserId,
+      };
       const craeteData = await userfollowers.create(doc);
 
       logger.info(`200:user now starting following`);
-      return response.Success({ message: `User ${objId} is now following ${targetUserId} ` });
+      return response.Success({
+        message: `User ${objId} is now following ${targetUserId} `,
+      });
     } catch (error) {
-
       logger.error(`500:message:data could not be updated`);
       return response.error_Bad_request("Internal server error", error);
     }
@@ -574,11 +631,6 @@ class userServices {
   //     return response.error_Bad_request("Something wents to wrong ");
   //   }
   // }
-
-
-
-
-
 }
 
 module.exports = new userServices();

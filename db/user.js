@@ -43,11 +43,10 @@ const userSchema = new mongoose.Schema({
   },
   timestamp: {
     type: Date,
-    default: new Date()
+    default: new Date(),
   },
   jwttoken: {
     type: String,
-
   },
   otp: {
     type: String,
@@ -65,17 +64,7 @@ const userSchema = new mongoose.Schema({
   walletverified: {
     type: Boolean,
   },
-  iteam:{
-    
-  }
-
-
-
-
-
-
-
-
+  iteam: {},
 });
 
 module.exports = mongoose.model("user", userSchema);

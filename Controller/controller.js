@@ -62,13 +62,13 @@ class Controller {
 
     }
 
-    async userLogin(req, res) {
-        const Credential = req.body;
-        const result = await userServices.userLogin(Credential);
+    // async userLogin(req, res) {
+    //     const Credential = req.body;
+    //     const result = await userServices.userLogin(Credential);
       
-        res.json({result})
+    //     res.json({result})
 
-    }
+    // }
     async updatepassword(req, res) {
         const Credential = req.body;
         const result = await userServices.update_password(Credential);

@@ -276,6 +276,53 @@ class vedioservices {
       return response.error("error while fetching top creaters", err);
     }
   }
+  async usertopCreaters(Credential) {
+    try {
+      const token = Credential.substr(7);
+      const userData = await userSchema.findOne({ jwttoken: token });
+      const addr = userData.walletid;
+      let data = await nftSchema.aggregate([
+        {
+          $group: {
+            _id: "$walletid",
+            total: {
+              $sum: 1,
+            },
+            details: {
+              $push: {
+                itemname: "$itemname",
+                Creator: "$Creator",
+                amount: "$amount",
+                walletId: "$walletid",
+              },
+            },
+            // Creator: {
+            //   $push: "$Creator",
+            // },
+            // amount: {
+            //   $push: "$amount",
+            // },
+          },
+        },
+        { $sort: { total: -1 } },
+      ]);
+      let ndata = data.map((item) => {
+        return { ...item };
+      });
+      let finalData = ndata.map((element) => {
+        if (element._id == addr) {
+          element["isUserData"] = true;
+        } else {
+          element["isUserData"] = false;
+        }
+        return element;
+      });
+      return response.Success(finalData);
+    } catch (err) {
+      console.log("error :", err);
+      return response.error("error while fetching top creaters", err);
+    }
+  }
 }
 
 module.exports = new vedioservices();

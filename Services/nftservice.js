@@ -5,6 +5,7 @@ const { createModulerLogger } = require("../LoggerServices/loggerservices");
 const logger = createModulerLogger("nftServices");
 const Web3 = require("web3");
 const compileData = require("../artifacts/contracts/openmartket2.sol/NFTMarketplace.json");
+const userSchema = require("../db/user");
 
 // const jwt = require("jsonwebtoken");
 // const Jwtkey = require("../utilities/jwtutilis");
@@ -359,6 +360,29 @@ class nftServices {
       return response.error("error while fetching data :", err);
     }
   }
+  async userLatest_Drops(Credential) {
+    try {
+      const token = Credential.substr(7);
+      const datas = await userSchema.findOne({ jwttoken: token });
+      const addr = datas.walletid;
+
+      let data = await nftSchema.find({}).sort({ created_at: -1 });
+      let ndata = data.map((item) => {
+        return { ...item._doc };
+      });
+      ndata.forEach((element) => {
+        if (element.walletid == addr) {
+          element["userData"] = true;
+        } else {
+          element["userData"] = false;
+        }
+      });
+      return response.Success(ndata);
+    } catch (err) {
+      console.log("error :", err);
+      return response.error("error while fetching data :", err);
+    }
+  }
   async topCollection() {
     try {
       const data = await nftcollectionSchema.aggregate([
@@ -380,8 +404,8 @@ class nftServices {
       ]);
       return response.Success("data :", data);
     } catch (error) {
-      console.log("error :", err);
-      return response.error("error while fetching data :", err);
+      console.log("error :", error);
+      return response.error("error while fetching data :", error);
     }
   }
   async get_All_Nft() {
@@ -391,6 +415,27 @@ class nftServices {
     } catch (error) {
       console.log("error :", err);
       return response.error("error while fetching data :", err);
+    }
+  }
+  async userGet_All_Nft(Credential) {
+    try {
+      const datas = await userSchema.findOne({ jwttoken: Credential });
+      const addr = datas.walletid;
+      const data = await nftSchema.find({}).sort({ created_at: -1 });
+      let ndata = data.map((item) => {
+        return { ...item._doc };
+      });
+      ndata.forEach((element) => {
+        if (element.walletid == addr) {
+          element["userData"] = true;
+        } else {
+          element["userData"] = false;
+        }
+      });
+      return response.Success(ndata);
+    } catch (error) {
+      console.log("error :", error);
+      return response.error("error while fetching data :", error);
     }
   }
 }
