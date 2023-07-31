@@ -35,7 +35,7 @@ route.post('/updatepassword', Controller.updatepassword);
 //---------------------------------------------------------------------
 route.post('/uploadprofile', authMiddleware.userAuthanticationMiddleware, Controller.uploadProfile);
 route.post('/createnft', authMiddleware.userAuthanticationMiddleware, Controller.createNft);
-route.post('/createNftCollection', authMiddleware.userAuthanticationMiddleware, Controller.createNftCollection);
+route.post('/createNftCollection', Controller.createNftCollection);
 route.post('/uploadvedio', uploadFile, Controller.uploadVedio);
 route.post('/qrcodecreate', authMiddleware.userAuthanticationMiddleware, Controller.qrcodeCreate);
 
@@ -49,7 +49,7 @@ route.post('/userUnFollow', authMiddleware.userAuthanticationMiddleware, Control
 route.post('/totaluserFollowers', authMiddleware.userAuthanticationMiddleware, controller.CountUserFollowers);
 route.get('/getprofileDetails', authMiddleware.userAuthanticationMiddleware, Controller.getprofileDetails)
 route.post('/directSale',  Controller.directSale);
-route.get('/getNFTpreview',Controller.getNFTpreview)
+route.get('/getNFTpreview',Controller.getNFTpreview);
 
 route.get('/latest-drops',nftcontroller.Latest_Drop);
 route.get('/top-creaters',nftcontroller.top_Creaters); 
@@ -61,6 +61,12 @@ route.get('/getall-nft',nftcontroller.getAll_Nft);
 route.get('/user-latest-drops',nftcontroller.userLatest_Drop);  //done
 route.get('/user-top-creaters',nftcontroller.userTop_Creaters);  //done
 route.get('/user-getall-nft',nftcontroller.usergetAll_Nft); 
+
+//------------------------------------------------------------------
+
+route.delete('/delete-nft',nftcontroller.delete_Nft);
+route.post('/list-nft',nftcontroller.list_Nft);
+route.get('/collection-list',nftcontroller.Collection_list);
 
 
 module.exports = route;

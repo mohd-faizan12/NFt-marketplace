@@ -76,7 +76,7 @@ class nftservices {
       });
     }
     const token = auth_header.substr(7);
-    const tcheck = jwts.verify(token, Jwtkey.Jwt_Key)
+    // const tcheck = jwts.verify(token, Jwtkey.Jwt_Key);
     // if (!tcheck) {
     //   return res.status(400).json({
     //     status: 400,
@@ -84,6 +84,23 @@ class nftservices {
     //   });
     // }
     const result = await nftServices.userGet_All_Nft(token);
+    res.json(result);
+  }
+  async delete_Nft(req, res) {
+    const data = req.query;
+    const itemName = data.itemname;
+    const result = await nftServices.deleteNft(itemName);
+    res.json(result);
+  }
+
+  async list_Nft(req, res) {
+    const data = req.body;
+    const result = await nftServices.ListNft(data);
+    res.json(result);
+  }
+
+  async Collection_list(req, res) {
+    const result = await nftServices.collectionList();
     res.json(result);
   }
 }

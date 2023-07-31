@@ -5,50 +5,59 @@ const Collection_Schema = new mongoose.Schema({
     type: String,
     require: true,
     unique: true,
-    lowercase: true,
     trim: true,
   },
   url: {
     type: String,
-    require: true,
     trim: true,
   },
-  links: {
-    // type:Object
-    website: String,
-    medium: String,
-    telegram: String,
-  },
-  creatorearnings: {
+  description: {
     type: String,
-    lowercase: true,
+  },
+  category: {
+    type: String,
+  },
+  links: [
+    {
+      website: {
+        type: String,
+      },
+      medium: {
+        type: String,
+      },
+      telegram: {
+        type: String,
+      },
+    },
+  ],
+
+  creatorEarnings: {
+    type: String,
     trim: true,
   },
-  Blockchain: {
+  blockchain: {
     type: String,
   },
 
-  Description: String,
-
-  paymenttoken: String,
-  Category: {
-    type: Array,
+  paymentToken: {
+    type: String,
   },
-  // type: Array,
 
   // validate: (value) => {
   //   return ["Popular", "Arts", "Games","Music","Sports","Photography","Virtualland","Fashion"].includes(value);
   // },
-  // trim: true,
-  // lowercase: true,
 
-  // Category : [{
-  //   lat : String,
-  //   lng : String
-  //    }]                                                                
   createdAt: {
     type: Date,
     default: new Date(),
+  },
+  logoImage: {
+    type: String,
+    require: true,
+  },
+  bannerImage: {
+    type: String,
+    require: true,
   },
 });
 

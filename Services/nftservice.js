@@ -6,6 +6,7 @@ const logger = createModulerLogger("nftServices");
 const Web3 = require("web3");
 const compileData = require("../artifacts/contracts/openmartket2.sol/NFTMarketplace.json");
 const userSchema = require("../db/user");
+const listingSchema = require("../db/listNftModel");
 
 // const jwt = require("jsonwebtoken");
 // const Jwtkey = require("../utilities/jwtutilis");
@@ -66,21 +67,31 @@ class nftServices {
 
   async createNftCollection(Credential) {
     try {
-      const data = new collectionSchema({
+      if (
+        !Credential.name ||
+        !Credential.logoImage ||
+        !Credential.bannerImage
+      ) {
+        return response.error_Bad_request("Please pass required fields");
+      }
+      const data = new nftcollectionSchema({
         name: Credential.name,
         url: Credential.url,
+        description: Credential.description,
+        category: Credential.category,
         links: Credential.links,
-        creatorearnings: Credential.creatorearnings,
-        Blockchain: Credential.Blockchain,
-        paymenttoken: Credential.paymenttoken,
-        Category: Credential.Category,
+        creatorEarnings: Credential.creatorEarnings,
+        blockchain: Credential.blockchain,
+        paymentToken: Credential.paymentToken,
+        logoImage: Credential.logoImage,
+        bannerImage: Credential.bannerImage,
       });
       await data.save();
       logger.info(data);
-      return response.Success(["data added"]);
+      return response.Success("data added");
     } catch (err) {
       logger.error("nft not created", err);
-      return response.error_Bad_request("nft not created", err);
+      return response.error_Bad_request("nft not created" + err);
     }
   }
 
@@ -413,8 +424,8 @@ class nftServices {
       const data = await nftSchema.find({}).sort({ created_at: -1 });
       return response.Success(data);
     } catch (error) {
-      console.log("error :", err);
-      return response.error("error while fetching data :", err);
+      console.log("error :", error);
+      return response.error("error while fetching data :", error);
     }
   }
   async userGet_All_Nft(Credential) {
@@ -436,6 +447,75 @@ class nftServices {
     } catch (error) {
       console.log("error :", error);
       return response.error("error while fetching data :", error);
+    }
+  }
+  async deleteNft(Credential) {
+    try {
+      const items = await nftSchema.findOne({ itemname: Credential });
+      if (!items) {
+        return response.Not_Found_Error("No nft found with such item name");
+      }
+      const listed = await listingSchema.findOne({ itemname: Credential });
+      if (listed) {
+        return response.error_Bad_request(
+          "Nft could not be deleted as it is already listed on sell "
+        );
+      }
+      const data = await nftSchema.deleteOne({ itemname: Credential });
+      return response.Success(data);
+    } catch (error) {
+      console.log("error :", error);
+      return response.error("error while deleting data :", error);
+    }
+  }
+
+  async ListNft(Credential) {
+    try {
+      if (Credential.type != "Fixed" && Credential.type != "Duration") {
+        return response.error("Type is not valid");
+      }
+      if (
+        !Credential.itemname ||
+        !Credential.type ||
+        !Credential.creator ||
+        !Credential.amount
+      ) {
+        return response.error("Please pass all required fields");
+      }
+      const data = await nftSchema.findOne({ itemname: Credential.itemname });
+      if (!data) {
+        return response.error("Please list a valid nft");
+      }
+      const datas = new listingSchema({
+        itemname: Credential.itemname,
+        creator: Credential.creator,
+        Url: Credential.url,
+        listingType: Credential.type,
+        nftPrice: Credential.amount,
+        creatorFee: Credential.creatorFee,
+        serviceFee: Credential.serviceFee,
+        duration: null,
+      });
+      await datas.save();
+      if (Credential.type == "Duration") {
+        datas.duration = Credential.duration;
+        await datas.save();
+      }
+      return response.Success("Nft listed");
+    } catch (error) {
+      console.log("error :", error);
+      return response.error("error while listing nft :", error);
+    }
+  }
+  async collectionList() {
+    try {
+      const data = await nftcollectionSchema
+        .find({}, { name: 1 })
+        .sort({ createdAt: -1 });
+      return response.Success(data);
+    } catch (error) {
+      console.log("error :", error);
+      return response.error("error getting collection list :", error);
     }
   }
 }
