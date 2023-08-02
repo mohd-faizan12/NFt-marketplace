@@ -85,6 +85,7 @@ class nftServices {
         paymentToken: Credential.paymentToken,
         logoImage: Credential.logoImage,
         bannerImage: Credential.bannerImage,
+        walletId: Credential.walletId,
       });
       await data.save();
       logger.info(data);
@@ -512,6 +513,42 @@ class nftServices {
       const data = await nftcollectionSchema
         .find({}, { name: 1 })
         .sort({ createdAt: -1 });
+      return response.Success(data);
+    } catch (error) {
+      console.log("error :", error);
+      return response.error("error getting collection list :", error);
+    }
+  }
+  async my_collection(Credential) {
+    try {
+      const data = await nftcollectionSchema.find({ walletId: Credential });
+      if (data.length == 0) {
+        return response.Not_Found_Error("No collection found");
+      }
+      return response.Success(data);
+    } catch (error) {
+      console.log("error :", error);
+      return response.error("error getting collection list :", error);
+    }
+  }
+  async collection_Preview(Credential) {
+    try {
+      const data = await nftSchema.find({ nftcollection: Credential });
+      if (data.length == 0) {
+        return response.Not_Found_Error("No collection found");
+      }
+      return response.Success(data);
+    } catch (error) {
+      console.log("error :", error);
+      return response.error("error getting collection list :", error);
+    }
+  }
+  async nft_Details(Credential) {
+    try {
+      const data = await nftSchema.find({ itemname: Credential });
+      if (data.length == 0) {
+        return response.Not_Found_Error("No collection found");
+      }
       return response.Success(data);
     } catch (error) {
       console.log("error :", error);

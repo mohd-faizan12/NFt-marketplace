@@ -67,6 +67,9 @@ route.get('/user-getall-nft',nftcontroller.usergetAll_Nft);
 route.delete('/delete-nft',nftcontroller.delete_Nft);
 route.post('/list-nft',nftcontroller.list_Nft);
 route.get('/collection-list',nftcontroller.Collection_list);
+route.get('/my-collection',nftcontroller.getMyCollection);
+route.get('/collection-preview',nftcontroller.collectionPreview);
+route.get('/get-nft',nftcontroller.nftDetails)
 
 
 module.exports = route;

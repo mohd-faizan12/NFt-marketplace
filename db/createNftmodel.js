@@ -20,7 +20,10 @@ const nft_Schema = new mongoose.Schema({
     trim: true,
     require: true,
   },
-  nftcollection: String,
+  nftcollection: {
+    type: String,
+    require: true,
+  },
 
   externallink: {
     type: String,

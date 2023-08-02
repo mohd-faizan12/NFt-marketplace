@@ -59,6 +59,11 @@ const Collection_Schema = new mongoose.Schema({
     type: String,
     require: true,
   },
+  walletId: {
+    type: String,
+    require: true,
+    trim: true,
+  },
 });
 
 module.exports = mongoose.model("CollectionNft", Collection_Schema);

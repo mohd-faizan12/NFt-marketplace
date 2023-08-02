@@ -103,5 +103,23 @@ class nftservices {
     const result = await nftServices.collectionList();
     res.json(result);
   }
+  async getMyCollection(req, res) {
+    const data = req.query;
+    const walledAddr = data.walletId;
+    const result = await nftServices.my_collection(walledAddr);
+    res.json(result);
+  }
+  async collectionPreview(req, res) {
+    const data = req.query;
+    const collecName = data.collectionName;
+    const result = await nftServices.collection_Preview(collecName);
+    res.json(result);
+  }
+  async nftDetails(req, res) {
+    const data = req.query;
+    const item_Name = data.itemname;
+    const result = await nftServices.nft_Details(item_Name);
+    res.json(result);
+  }
 }
 module.exports = new nftservices();
