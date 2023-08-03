@@ -58,9 +58,9 @@ route.get('/getall-nft',nftcontroller.getAll_Nft);
 
 // ---------------------------Token Based------------------------------
 
-route.get('/user-latest-drops',nftcontroller.userLatest_Drop);  //done
-route.get('/user-top-creaters',nftcontroller.userTop_Creaters);  //done
-route.get('/user-getall-nft',nftcontroller.usergetAll_Nft); 
+route.get('/user-latest-drops',authMiddleware.middleware_Auth,nftcontroller.userLatest_Drop);  //done
+route.get('/user-top-creaters',authMiddleware.middleware_Auth,nftcontroller.userTop_Creaters);  //done
+route.get('/user-getall-nft',authMiddleware.middleware_Auth,nftcontroller.usergetAll_Nft); 
 
 //------------------------------------------------------------------
 
@@ -69,7 +69,9 @@ route.post('/list-nft',nftcontroller.list_Nft);
 route.get('/collection-list',nftcontroller.Collection_list);
 route.get('/my-collection',nftcontroller.getMyCollection);
 route.get('/collection-preview',nftcontroller.collectionPreview);
-route.get('/get-nft',nftcontroller.nftDetails)
+route.get('/get-nft',nftcontroller.nftDetails);
+route.post('/makeoffer',authMiddleware.middleware_Auth,nftcontroller.makeAnOffer);
+route.get('/profile-details',authMiddleware.middleware_Auth,nftcontroller.profileDetails);
 
 
 module.exports = route;

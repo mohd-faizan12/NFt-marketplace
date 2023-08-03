@@ -279,9 +279,10 @@ class vedioservices {
   }
   async usertopCreaters(Credential) {
     try {
-      const token = Credential.substr(7);
-      const userData = await userSchema.findOne({ jwttoken: token });
-      const addr = userData.walletid;
+      const addr = Credential;
+      if (!addr) {
+        return response.error_Bad_request("Wallet address could not be found");
+      }
       let data = await nftSchema.aggregate([
         {
           $group: {

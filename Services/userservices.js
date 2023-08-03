@@ -448,50 +448,31 @@ class userServices {
   }
 
   async uploadProfile(Credential, authHeader) {
-    let finfdb = await user.exists({
-      username: Credential.username,
-      email: Credential.email,
-    });
-    if (finfdb) {
-      return response.Unauthorized_response(
-        "Profile allready exist with given  username and emailAddress !!"
-      );
-    }
     try {
-      Credential.password = Credential.password = bcrypt.hashSync(
-        Credential.password,
-        bcrypt.genSaltSync()
-      );
-
-      const token = authHeader && authHeader.split(" ")[1];
-      const decodedPayload = jwt.decode(token);
-
-      const walletfind = await user.findOne({
-        walletid: decodedPayload.walletid.toLowerCase(),
-      });
-      if (!walletfind) {
-        return response.Not_Found_Error("Invalid request: wallet not Exist");
+      let pass;
+      if (Credential.password) {
+        pass = bcrypt.hashSync(Credential.password, bcrypt.genSaltSync());
       }
 
       const updatedata = await user.updateOne(
-        { walletid: decodedPayload.walletid },
+        { jwttoken: authHeader },
         {
           $set: {
             fullname: Credential.fullname,
             email: Credential.email,
             username: Credential.username,
             bio: Credential.bio,
-            password: Credential.password,
+            password: pass,
             discord: Credential.discord,
             twitter: Credential.twitter,
           },
         }
       );
 
-      return response.Success("Profile  is successfully added");
+      return response.Success("Profile updated successfully");
     } catch (err) {
       logger.error("data could not be updated");
-      return response.error_Bad_request("data could not be updated", err);
+      return response.error_Bad_request("data could not be updated" + err);
     }
   }
 

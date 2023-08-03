@@ -34,14 +34,9 @@ class nftservices {
     res.json(result);
   }
   async userLatest_Drop(req, res) {
-    const auth_header = req.header(AUTH_HEADER);
-    if (!auth_header || !auth_header.startsWith("Bearer ")) {
-      return res.status(401).json({
-        status: 401,
-        message: "Authentication Failed. please send Bearer Token",
-      });
-    }
-    const result = await nftServices.userLatest_Drops(auth_header);
+    const data = req.userDetails;
+    const walletAddr = data.walletid;
+    const result = await nftServices.userLatest_Drops(walletAddr);
     res.json(result);
   }
   async top_Creaters(req, res) {
@@ -49,14 +44,10 @@ class nftservices {
     res.json(result);
   }
   async userTop_Creaters(req, res) {
-    const auth_header = req.header(AUTH_HEADER);
-    if (!auth_header || !auth_header.startsWith("Bearer ")) {
-      return res.status(401).json({
-        status: 401,
-        message: "Authentication Failed. please send Bearer Token",
-      });
-    }
-    const result = await vedioservices.usertopCreaters(auth_header);
+    const userData = req.userDetails;
+    const walletAddr = userData.walletid;
+
+    const result = await vedioservices.usertopCreaters(walletAddr);
     res.json(result);
   }
   async top_Collection(req, res) {
@@ -68,22 +59,10 @@ class nftservices {
     res.json(result);
   }
   async usergetAll_Nft(req, res) {
-    const auth_header = req.header(AUTH_HEADER);
-    if (!auth_header || !auth_header.startsWith("Bearer ")) {
-      return res.status(401).json({
-        status: 401,
-        message: "Authentication Failed. please send Bearer Token",
-      });
-    }
-    const token = auth_header.substr(7);
-    // const tcheck = jwts.verify(token, Jwtkey.Jwt_Key);
-    // if (!tcheck) {
-    //   return res.status(400).json({
-    //     status: 400,
-    //     message: "Invalid or malformed jwt token",
-    //   });
-    // }
-    const result = await nftServices.userGet_All_Nft(token);
+    const data = req.userDetails;
+    const walletAddr = data.walletid;
+
+    const result = await nftServices.userGet_All_Nft(walletAddr);
     res.json(result);
   }
   async delete_Nft(req, res) {
@@ -119,6 +98,17 @@ class nftservices {
     const data = req.query;
     const item_Name = data.itemname;
     const result = await nftServices.nft_Details(item_Name);
+    res.json(result);
+  }
+  async makeAnOffer(req, res) {
+    const data = req.body;
+    const userData = req.userDetails;
+    const result = await nftServices.make_AnOffer(data, userData);
+    res.json(result);
+  }
+  async profileDetails(req, res) {
+    const userData = req.userDetails;
+    const result = await nftServices.profile_Details(userData);
     res.json(result);
   }
 }

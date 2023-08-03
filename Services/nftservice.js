@@ -7,7 +7,8 @@ const Web3 = require("web3");
 const compileData = require("../artifacts/contracts/openmartket2.sol/NFTMarketplace.json");
 const userSchema = require("../db/user");
 const listingSchema = require("../db/listNftModel");
-
+const offerSchema = require("../db/nftOfferModel");
+const { default: mongoose } = require("mongoose");
 // const jwt = require("jsonwebtoken");
 // const Jwtkey = require("../utilities/jwtutilis");
 
@@ -374,9 +375,12 @@ class nftServices {
   }
   async userLatest_Drops(Credential) {
     try {
-      const token = Credential.substr(7);
-      const datas = await userSchema.findOne({ jwttoken: token });
-      const addr = datas.walletid;
+      // const token = Credential.substr(7);
+      // const datas = await userSchema.findOne({ jwttoken: token });
+      const addr = Credential;
+      if (!addr) {
+        return response.error_Bad_request("Wallet id could not be found");
+      }
 
       let data = await nftSchema.find({}).sort({ created_at: -1 });
       let ndata = data.map((item) => {
@@ -431,8 +435,7 @@ class nftServices {
   }
   async userGet_All_Nft(Credential) {
     try {
-      const datas = await userSchema.findOne({ jwttoken: Credential });
-      const addr = datas.walletid;
+      const addr = Credential;
       const data = await nftSchema.find({}).sort({ created_at: -1 });
       let ndata = data.map((item) => {
         return { ...item._doc };
@@ -550,6 +553,54 @@ class nftServices {
         return response.Not_Found_Error("No collection found");
       }
       return response.Success(data);
+    } catch (error) {
+      console.log("error :", error);
+      return response.error("error getting collection list :", error);
+    }
+  }
+
+  async make_AnOffer(data, userData) {
+    try {
+      const user = userData;
+      if (!user || !data.itemname || !data.offeredAmount) {
+        return response.error_Bad_request("Please pass all required fields");
+      }
+      const findNFT = await nftSchema.findOne({ itemname: data.itemname });
+      if (!findNFT) {
+        return response.Not_Found_Error("No NFT found with such item name");
+      }
+      const details = {
+        name: userData.fullname,
+        email: userData.email,
+        walletId: userData.walletid,
+      };
+      const datas = new offerSchema({
+        itemname: data.itemname,
+        offeredAmount: data.offeredAmount,
+        duration: data.offerDuration,
+        offeredBy: details,
+      });
+      await datas.save();
+      return response.Success("Offer made successfully");
+    } catch (error) {
+      console.log("error :", error);
+      return response.error("error making an offer :", error);
+    }
+  }
+
+  async profile_Details(Credential) {
+    try {
+      const details = {
+        _id: Credential._id,
+        name: Credential.fullname || null,
+        walletId: Credential.walletid || null,
+        bio: Credential.bio || null,
+        links: {
+          discord: Credential.discord || null,
+          twitter: Credential.twitter || null,
+        },
+      };
+      return response.Success(details);
     } catch (error) {
       console.log("error :", error);
       return response.error("error getting collection list :", error);
