@@ -7,8 +7,9 @@ const Web3 = require("web3");
 const compileData = require("../artifacts/contracts/openmartket2.sol/NFTMarketplace.json");
 const userSchema = require("../db/user");
 const listingSchema = require("../db/listNftModel");
-const offerSchema = require("../db/nftOfferModel");
 const { default: mongoose } = require("mongoose");
+const nftOfferModel = require("../db/nftOfferModel");
+const followSchema = require("../db/userFollowings");
 // const jwt = require("jsonwebtoken");
 // const Jwtkey = require("../utilities/jwtutilis");
 
@@ -501,6 +502,8 @@ class nftServices {
         duration: null,
       });
       await datas.save();
+      data.isListed = true;
+      await data.save();
       if (Credential.type == "Duration") {
         datas.duration = Credential.duration;
         await datas.save();
@@ -574,7 +577,7 @@ class nftServices {
         email: userData.email,
         walletId: userData.walletid,
       };
-      const datas = new offerSchema({
+      const datas = new nftOfferModel({
         itemname: data.itemname,
         offeredAmount: data.offeredAmount,
         duration: data.offerDuration,
@@ -601,6 +604,92 @@ class nftServices {
         },
       };
       return response.Success(details);
+    } catch (error) {
+      console.log("error :", error);
+      return response.error("error getting collection list :", error);
+    }
+  }
+  async user_NFTs(Credential, query) {
+    try {
+      let data;
+      if (query.collection || query.Listed) {
+        if (query.colletcion) {
+          data = await nftSchema.find({
+            walletid: Credential,
+            nftcollection: query.colletcion,
+          });
+        } else if (query.Listed) {
+          data = await nftSchema.find({
+            walletid: Credential,
+            isListed: true,
+          });
+        }
+      } else {
+        data = await nftSchema.find({ walletid: Credential });
+      }
+      return response.Success(data);
+    } catch (error) {
+      console.log("error :", error);
+      return response.error("error getting collection list :", error);
+    }
+  }
+  async NFTs_Offer(Credential) {
+    try {
+      if (!Credential) {
+        return response.error_Bad_request("Please item name");
+      }
+      const data = await nftOfferModel.find({ itemname: Credential });
+      if (data.length == 0) {
+        return response.Not_Found_Error("No offer made yet ");
+      }
+      return response.Success(data);
+    } catch (error) {
+      console.log("error :", error);
+      return response.error("error getting collection list :", error);
+    }
+  }
+  async userFollow(Credential) {
+    try {
+      const follow = await userSchema.findOneAndUpdate(
+        { email: Credential },
+        { $inc: { followers: 1 } }
+      );
+      return response.Success("Followed");
+    } catch (error) {
+      console.log("error :", error);
+      return response.error("error getting collection list :", error);
+    }
+  }
+  async user_ProfileDetails(Credential) {
+    try {
+      let data = await userSchema.findOne(
+        { _id: Credential },
+        {
+          walletid: 1,
+          fullname: 1,
+          email: 1,
+          username: 1,
+          discord: 1,
+          twitter: 1,
+          bio: 1,
+        }
+      );
+      const followers = await followSchema.aggregate([
+        {
+          $match: { followee: Credential },
+        },
+        {
+          $group: {
+            _id: null,
+            count: {
+              $sum: 1,
+            },
+          },
+        },
+      ]);
+      let finalData = JSON.parse(JSON.stringify(data));
+      finalData["followersCount"] = followers[0].count;
+      return response.Success(finalData);
     } catch (error) {
       console.log("error :", error);
       return response.error("error getting collection list :", error);

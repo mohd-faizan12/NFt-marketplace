@@ -55,6 +55,10 @@ const nft_Schema = new mongoose.Schema({
     type: Date,
     default: new Date(),
   },
+  isListed: {
+    type: String,
+    default: false,
+  },
 });
 
 module.exports = mongoose.model("createNft", nft_Schema);

@@ -193,7 +193,7 @@ class userServices {
       }
       const userfind = await userschema.findOne({
         email: payload.email,
-        IsOtpVerified: true,
+        // IsOtpVerified: true,
       });
       if (!userfind) {
         return response.error_Bad_request("account is not found");
@@ -207,7 +207,7 @@ class userServices {
       };
       let token = jwt.sign(tokenpayload, Jwtkey.Jwt_Key, {
         algorithm: "HS256",
-        expiresIn: "1d",
+        // expiresIn: "1d",
       });
       userfind.isverified = true;
       userfind.jwttoken = token;
@@ -470,33 +470,34 @@ class userServices {
       );
 
       return response.Success("Profile updated successfully");
-    } catch (err) {
+    } catch (err) {route.post('/uploadprofile', authMiddleware.userAuthanticationMiddleware, Controller.uploadProfile);
+
       logger.error("data could not be updated");
       return response.error_Bad_request("data could not be updated" + err);
     }
   }
 
-  async userFollow(objId, targetUserId) {
+  async userFollow(followerID, followeeId) {
     try {
-      const findData = await userfollowers.find({
-        follower: objId,
-        followee: targetUserId,
+      const usersData = await userfollowers.find({
+        follower: followerID,
+        followee: followeeId,
       });
 
-      if (findData.length !== 0) {
-        return response.Success({
-          message: `User ${objId} is allready follow ${targetUserId} `,
+      if (usersData.length != 0) {
+        return response.error_Bad_request({
+          message: `User ${followerID} is allready follow ${followeeId} `,
         });
       }
       const doc = {
-        follower: objId,
-        followee: targetUserId,
+        follower: followerID,
+        followee: followeeId,
       };
       const craeteData = await userfollowers.create(doc);
 
       logger.info(`200:user now starting following`);
       return response.Success({
-        message: `User ${objId} is now following ${targetUserId} `,
+        message: `User ${followerID} is now following ${followeeId} `,
       });
     } catch (error) {
       logger.error(`500:message:data could not be updated`);
@@ -513,7 +514,7 @@ class userServices {
 
       logger.info(`200:User is now unfollwing ${targetUserId} `);
       return response.Success({
-        message: `User ${objId} is now  Unfollowing  ${targetUserId} `,
+        message: `User ${followerID} is now  Unfollowing  ${targetUserId} `,
       });
     } catch (error) {
       logger.error(`500:message:data could not be updated`);

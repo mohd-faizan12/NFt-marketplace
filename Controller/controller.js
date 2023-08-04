@@ -87,12 +87,10 @@ class Controller {
     res.send(result.data);
   }
   async userFollow(req, res) {
-    const objId = req.query.userid;
-    // const querypayload =ObjectId(objId)
-    const { targetUserId } = req.body;
-    // The user performing the follow action
+    const {_id} = req.userDetails;
+    const { userId } = req.body;
 
-    const result = await userServices.userFollow(objId, targetUserId);
+    const result = await userServices.userFollow(_id, userId);
     res.json(result);
   }
   async userUnFollow(req, res) {

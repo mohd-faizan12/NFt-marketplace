@@ -111,5 +111,30 @@ class nftservices {
     const result = await nftServices.profile_Details(userData);
     res.json(result);
   }
+  async userNFTs(req, res) {
+    const data = req.query;
+    const userData = req.userDetails;
+    const walletAddr = userData.walletid;
+    const result = await nftServices.user_NFTs(walletAddr, data);
+    res.json(result);
+  }
+  async nftsOffer(req, res) {
+    const itemName = req.query.itemName;
+
+    const result = await nftServices.NFTs_Offer(itemName);
+    res.json(result);
+  }
+  async user_Follow(req, res) {
+    const data = req.body.email;
+
+    const result = await nftServices.userFollow(data);
+    res.json(result);
+  }
+
+  async userProfileDetails(req, res) {
+    const ObjId = req.query.id;
+    const result = await nftServices.user_ProfileDetails(ObjId);
+    res.json(result);
+  }
 }
 module.exports = new nftservices();

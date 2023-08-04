@@ -72,7 +72,7 @@ class authMiddleware {
         );
       }
     } catch (error) {
-      res.json(response.error_Bad_request("Authantication is failed" + error));
+      return response.error_Bad_request("Authantication is failed" + error);
     }
   }
 }

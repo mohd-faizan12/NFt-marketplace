@@ -33,18 +33,16 @@ route.post('/updatepassword', Controller.updatepassword);
 
 
 //---------------------------------------------------------------------
-route.post('/uploadprofile', authMiddleware.userAuthanticationMiddleware, Controller.uploadProfile);
 route.post('/createnft', authMiddleware.userAuthanticationMiddleware, Controller.createNft);
 route.post('/createNftCollection', Controller.createNftCollection);
 route.post('/uploadvedio', uploadFile, Controller.uploadVedio);
 route.post('/qrcodecreate', authMiddleware.userAuthanticationMiddleware, Controller.qrcodeCreate);
 
 
-//----------------contractr services-------------------------
+//----------------contract services-------------------------
 route.get('/cgetallnfts', authMiddleware.userAuthanticationMiddleware, nftcontroller.getallnfts);
 route.post('/getmynfts', authMiddleware.userAuthanticationMiddleware, nftcontroller.createtoken);
 //----------------------------
-route.post('/userFollow', authMiddleware.userAuthanticationMiddleware, Controller.userFollow);
 route.post('/userUnFollow', authMiddleware.userAuthanticationMiddleware, Controller.userUnFollow);
 route.post('/totaluserFollowers', authMiddleware.userAuthanticationMiddleware, controller.CountUserFollowers);
 route.get('/getprofileDetails', authMiddleware.userAuthanticationMiddleware, Controller.getprofileDetails)
@@ -71,7 +69,15 @@ route.get('/my-collection',nftcontroller.getMyCollection);
 route.get('/collection-preview',nftcontroller.collectionPreview);
 route.get('/get-nft',nftcontroller.nftDetails);
 route.post('/makeoffer',authMiddleware.middleware_Auth,nftcontroller.makeAnOffer);
-route.get('/profile-details',authMiddleware.middleware_Auth,nftcontroller.profileDetails);
+route.get('/profile-details',authMiddleware.middleware_Auth,nftcontroller.profileDetails); //user self
+route.get('/user-nfts',authMiddleware.middleware_Auth,nftcontroller.userNFTs);
+route.get('/get-alloffers',nftcontroller.nftsOffer);
+// route.post('/follow',authMiddleware.middleware_Auth,nftcontroller.user_Follow);
+route.post('/userFollow', authMiddleware.middleware_Auth, Controller.userFollow);
+ 
+route.get('/user-profileDetails',nftcontroller.userProfileDetails);
+route.post('/uploadprofile', authMiddleware.userAuthanticationMiddleware, Controller.uploadProfile);
+
 
 
 module.exports = route;

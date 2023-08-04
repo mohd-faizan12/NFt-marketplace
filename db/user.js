@@ -20,6 +20,7 @@ const userSchema = new mongoose.Schema({
   },
   email: {
     type: String,
+    unique: true,
     lowercase: true,
     trim: true,
   },
@@ -65,6 +66,10 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
   },
   iteam: {},
+  followers: {
+    type: Number,
+    default: 0,
+  },
 });
 
 module.exports = mongoose.model("user", userSchema);
