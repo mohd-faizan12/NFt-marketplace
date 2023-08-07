@@ -75,7 +75,7 @@ route.get('/get-alloffers',nftcontroller.nftsOffer);
 // route.post('/follow',authMiddleware.middleware_Auth,nftcontroller.user_Follow);
 route.post('/userFollow', authMiddleware.middleware_Auth, Controller.userFollow);
  
-route.get('/user-profileDetails',nftcontroller.userProfileDetails);
+route.get('/user-profileDetails',authMiddleware.middleware_Auth,nftcontroller.userProfileDetails);
 route.post('/uploadprofile', authMiddleware.userAuthanticationMiddleware, Controller.uploadProfile);
 
 

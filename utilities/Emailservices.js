@@ -52,7 +52,7 @@ class EmailServices {
       if(Credential.multipleEmail){
         checkEmailSent = await mailSendingFunc(data,Credential.multipleEmail,emailSubject);
       }else if(Credential.email){
-        checkEmailSent = await mailSendingFunc(data,Credential.email,emailSubject);
+          checkEmailSent = await mailSendingFunc(data,Credential.email,emailSubject);
       }else{
         return false;
       }

@@ -72,14 +72,14 @@ class Controller {
 
   async uploadVedio(req, res) {
     const Credential = req.body;
-    Credential.video = req.files.video;
-    Credential.thumbnail = req.files.thumbnail;
+    // Credential.video = req.files.video;
+    // Credential.thumbnail = req.files.thumbnail;
 
-    const result = await vedioServices.UploadVedio(Credential);
+    const result = await vedioServices.UploadVedio(req,Credential);
     res.status(result.status).json({ result });
   }
 
-  async qrcodeCreate(req, res) {
+  async qrcodeCreate(req, res) {  
     const Credential = req.body;
     const result = await vedioServices.qrcodeCreate(Credential);
 
