@@ -74,48 +74,30 @@ class vedioservices {
 
       //     logger.info("Delete File successfully.");
       // });
+
+      //aws
+      if (
+        !req.files ||
+        !req.files.video ||
+        !req.files.thumbnail ||
+        !Credential.itemname
+      ) {
+        return response.error_Bad_request(
+          "Please pass nft vedeo or thumbnail or Item name"
+        );
+      }
+      const nftData = await nftSchema.findOne({
+        itemname: Credential.itemname,
+      });
+      if (nftData) {
+        return response.Success("NFT already exists with such item name");
+      }
       let fileBuffer = req.files.video[0].buffer;
       let thumbnailBuffer = req.files.thumbnail[0].buffer;
       const s3 = new AWS.S3({
         accessKeyId: process.env.accessKey_Id,
         secretAccessKey: process.env.secretAccess_Key,
       });
-      let vedeoUrl;
-      let thumbnailUrl;
-      if (req.files.video.length) {
-        let params = {
-          Bucket: process.env.Bucket_Name,
-          Key: `${
-            "Nft-vedeo" + req.files.video[0].encoding + new Date().toISOString()
-          }.png`, // File name you want to save as in S3
-          Body: fileBuffer,
-        };
-        let stored = await s3.upload(params).promise();
-        vedeoUrl = stored.Location;
-      }
-      if (req.files.thumbnail) {
-        let params = {
-          Bucket: process.env.Bucket_Name,
-          Key: `${
-            "Nft-thumbnain" +
-            "-" +
-            req.files.video[0].encoding +
-            "-" +
-            new Date().toISOString()
-          }.png`, // File name you want to save as in S3
-          Body: thumbnailBuffer,
-        };
-        let upload = await s3.upload(params).promise();
-        thumbnailUrl = upload.Location;
-      }
-      if (!vedeoUrl || !thumbnailUrl) {
-        return response.error_Bad_request(
-          "Vedeo or THumbnail could not be uploaded  to aws"
-        );
-      }
-      if (!Credential.itemname) {
-        return response.error_Bad_request("Please don't leave any field empty");
-      }
 
       let senderPrivateKey = Credential.senderPrivateKey;
 
@@ -138,6 +120,39 @@ class vedioservices {
       logger.info(
         `200 : Web3 connection with Blockchain has built successfully`
       );
+      let vedeoUrl;
+      let thumbnailUrl;
+      if (req.files.video.length) {
+        let params = {
+          Bucket: process.env.Bucket_Name,
+          Key: `${
+            "Nft-vedeo" + req.files.video[0].encoding + new Date().toISOString()
+          }.png`, // File name you want to save as in S3
+          Body: fileBuffer,
+        };
+        let stored = await s3.upload(params).promise();
+        vedeoUrl = stored.Location;
+      }
+      if (req.files.thumbnail.length) {
+        let params = {
+          Bucket: process.env.Bucket_Name,
+          Key: `${
+            "Nft-thumbnail" +
+            "-" +
+            req.files.video[0].encoding +
+            "-" +
+            new Date().toISOString()
+          }.png`, // File name you want to save as in S3
+          Body: thumbnailBuffer,
+        };
+        let upload = await s3.upload(params).promise();
+        thumbnailUrl = upload.Location;
+      }
+      if (!vedeoUrl || !thumbnailUrl) {
+        return response.error_Bad_request(
+          "Vedeo or THumbnail could not be uploaded  to aws"
+        );
+      }
       const account = await web3.eth.accounts.wallet.add(senderPrivateKey);
       logger.info(`200 : Account address : ${account.address}`);
 
@@ -174,10 +189,13 @@ class vedioservices {
       const createReceipt = await web3.eth.sendSignedTransaction(
         createTransaction.rawTransaction
       );
-        
+      const Id = createReceipt.logs[createReceipt.logs.length - 1].data;
+      const tokenId = web3.eth.abi.decodeLog(["uint"], Id);
+      const finalTokenID = tokenId[0];
       logger.info(
         `Transaction successful with hash: ${createReceipt.transactionHash}`
       );
+
       logger.info(
         `Transaction details: ${JSON.stringify(createReceipt, null, "  ")}`
       );
@@ -204,19 +222,12 @@ class vedioservices {
         amount: Credential.amount,
         transactionHash: createReceipt.transactionHash,
         walletid: account.address,
-        tokenId: parseInt(
-          createReceipt.logs[createReceipt.logs.length - 1].data,
-          16
-        ),
+        tokenId: finalTokenID,
         Creator: userData.fullname,
         email: userData.email,
       });
 
       await datasave.save();
-
-      if (!datasave) {
-        return response.error_Bad_request("Please pass all feilds correct");
-      }
 
       // return response.Success("final", {
       //   ...result1.data.responseArray,
@@ -233,7 +244,7 @@ class vedioservices {
 
       // result1.data.responseArray[0].fileId
       // } else {
-      //   return response.error_Bad_request(
+      //   return response.error_Bad_request(0x85e871ca65d05FFA20D9190907a1BDaE6e5BCb71
       //     "please pass valid file",
       //     result.data.message
       //   );

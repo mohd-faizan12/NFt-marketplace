@@ -124,12 +124,6 @@ class nftservices {
     const result = await nftServices.NFTs_Offer(itemName);
     res.json(result);
   }
-  async user_Follow(req, res) {
-    const data = req.body.email;
-
-    const result = await nftServices.userFollow(data);
-    res.json(result);
-  }
 
   async userProfileDetails(req, res) {
     const ObjId = req.query.id;

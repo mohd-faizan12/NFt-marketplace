@@ -40,8 +40,8 @@ class Controller {
 
   async walletConnect(req, res) {
     const Credential = req.body;
-    const authHeader = req.headers["authorization"];
-    const result = await userServices.walletConnect(Credential, authHeader);
+    const userDetails = req.userDetails;
+    const result = await userServices.walletConnect(Credential,userDetails);
     res.json({ result });
   }
 
@@ -75,11 +75,11 @@ class Controller {
     // Credential.video = req.files.video;
     // Credential.thumbnail = req.files.thumbnail;
 
-    const result = await vedioServices.UploadVedio(req,Credential);
+    const result = await vedioServices.UploadVedio(req, Credential);
     res.status(result.status).json({ result });
   }
 
-  async qrcodeCreate(req, res) {  
+  async qrcodeCreate(req, res) {
     const Credential = req.body;
     const result = await vedioServices.qrcodeCreate(Credential);
 
@@ -87,7 +87,7 @@ class Controller {
     res.send(result.data);
   }
   async userFollow(req, res) {
-    const {_id} = req.userDetails;
+    const { _id } = req.userDetails;
     const { userId } = req.body;
 
     const result = await userServices.userFollow(_id, userId);

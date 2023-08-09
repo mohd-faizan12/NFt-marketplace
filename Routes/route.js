@@ -20,7 +20,7 @@ const uploadFile = upload.fields([{
 route.post('/user_registration', Controller.user_registration);
 route.post('/otp_verification', Controller.otp_verification);
 route.post('/user_login', Controller.userLogin);
-route.post('/walletconnect', Controller.walletConnect);
+route.post('/walletconnect', authMiddleware.middleware_Auth,Controller.walletConnect);
 route.post('/forgot_password', Controller.forgot_password);
 route.post('/verifyotpPasschange', Controller.verifyotpPasschange);
 route.post('/resetpassword', Controller.resetpassword);
@@ -70,9 +70,8 @@ route.get('/collection-preview',nftcontroller.collectionPreview);
 route.get('/get-nft',nftcontroller.nftDetails);
 route.post('/makeoffer',authMiddleware.middleware_Auth,nftcontroller.makeAnOffer);
 route.get('/profile-details',authMiddleware.middleware_Auth,nftcontroller.profileDetails); //user self
-route.get('/user-nfts',authMiddleware.middleware_Auth,nftcontroller.userNFTs);
+route.get('/user-nfts',authMiddleware.middleware_Auth,nftcontroller.userNFTs);  
 route.get('/get-alloffers',nftcontroller.nftsOffer);
-// route.post('/follow',authMiddleware.middleware_Auth,nftcontroller.user_Follow);
 route.post('/userFollow', authMiddleware.middleware_Auth, Controller.userFollow);
  
 route.get('/user-profileDetails',authMiddleware.middleware_Auth,nftcontroller.userProfileDetails);

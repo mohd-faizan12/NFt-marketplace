@@ -109,28 +109,18 @@ class userServices {
       return response.error_Bad_request("Your Otp is mismatched");
     }
   }
-  async walletConnect(Credential) {
+  async walletConnect(Credential, user) {
     try {
-      if (!Credential.walletid) {
+      if (!Credential.walletid || !Credential.senderPrivateKey) {
         return response.Unauthorized_response(
           "!! Please enter wallet id on payload"
         );
       }
-      if (!Credential.senderPrivateKey) {
-        return response.Unauthorized_response(
-          "!! Please enter senderPrivateKey on payload"
-        );
-      }
-      if (!Credential.email) {
-        return response.Unauthorized_response(
-          "!! Please enter  Email on payload"
-        );
-      }
 
-      const data = await userschema.findOne(
-        { walletid: Credential.walletid.toLowerCase(), IsOtpVerified: true },
-        { __v: 0 }
-      );
+      const data = await userschema.findOne({
+        email: user.email,
+        walletid: Credential.walletid.toLowerCase(),
+      });
 
       if (data) {
         return response.Already_Occupied_Error(
@@ -149,7 +139,7 @@ class userServices {
 
       if (result && result.data.result) {
         const updateDb = await userschema.findOneAndUpdate(
-          { email: Credential.email },
+          { email: user.email },
           {
             walletid: Credential.walletid,
             txHash: result.data.result.TxHash,
@@ -163,7 +153,7 @@ class userServices {
           );
         } else {
           let emailStatus = await emailServices.sendTestMail(
-            Credential,
+            user,
             path.join(__dirname, "../Tem/user-wallet-connect.html"),
             {
               data,
@@ -212,7 +202,10 @@ class userServices {
       userfind.isverified = true;
       userfind.jwttoken = token;
       await userfind.save();
-      return response.Success("Token is generated", { token: token });
+      return response.Success("Token is generated", {
+        token: token,
+        isWalletVerified: userfind.walletverified,
+      });
     } catch (error) {
       console.log("error", error);
       logger.error("user is not create something went to wrong ");
@@ -470,7 +463,12 @@ class userServices {
       );
 
       return response.Success("Profile updated successfully");
-    } catch (err) {route.post('/uploadprofile', authMiddleware.userAuthanticationMiddleware, Controller.uploadProfile);
+    } catch (err) {
+      route.post(
+        "/uploadprofile",
+        authMiddleware.userAuthanticationMiddleware,
+        Controller.uploadProfile
+      );
 
       logger.error("data could not be updated");
       return response.error_Bad_request("data could not be updated" + err);

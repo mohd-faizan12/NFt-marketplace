@@ -648,18 +648,7 @@ class nftServices {
       return response.error("error getting collection list :", error);
     }
   }
-  async userFollow(Credential) {
-    try {
-      const follow = await userSchema.findOneAndUpdate(
-        { email: Credential },
-        { $inc: { followers: 1 } }
-      );
-      return response.Success("Followed");
-    } catch (error) {
-      console.log("error :", error);
-      return response.error("error getting collection list :", error);
-    }
-  }
+
   async user_ProfileDetails(Credential) {
     try {
       let data = await userSchema.findOne(

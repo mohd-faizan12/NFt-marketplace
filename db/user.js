@@ -64,11 +64,7 @@ const userSchema = new mongoose.Schema({
 
   walletverified: {
     type: Boolean,
-  },
-  iteam: {},
-  followers: {
-    type: Number,
-    default: 0,
+    default: false,
   },
 });
 
