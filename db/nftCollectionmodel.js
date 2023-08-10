@@ -64,6 +64,11 @@ const Collection_Schema = new mongoose.Schema({
     require: true,
     trim: true,
   },
+  Creator: {
+    type: String,
+    require: true,
+    trim: true,
+  },
 });
 
 module.exports = mongoose.model("CollectionNft", Collection_Schema);

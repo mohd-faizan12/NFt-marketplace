@@ -10,10 +10,11 @@ const listingSchema = require("../db/listNftModel");
 const { default: mongoose } = require("mongoose");
 const nftOfferModel = require("../db/nftOfferModel");
 const followSchema = require("../db/userFollowings");
+// const { nftDetails } = require("../Controller/nftcontroller");
 // const jwt = require("jsonwebtoken");
 // const Jwtkey = require("../utilities/jwtutilis");
 
-class nftServices {
+class NFTService {
   //input feilds : itemname ,supply,blockchain,collection,description,imagehash,thumbnailhash
   // async createNft(Credential) {
   //   try {
@@ -67,8 +68,9 @@ class nftServices {
   //   }
   // }
 
-  async createNftCollection(Credential) {
+  async createNftCollection(userData, Credential) {
     try {
+      let email = userData.email;
       if (
         !Credential.name ||
         !Credential.logoImage ||
@@ -76,6 +78,15 @@ class nftServices {
       ) {
         return response.error_Bad_request("Please pass required fields");
       }
+      const user = await userSchema.findOne({ email: email });
+      let username;
+      if (!user || !user.username) {
+        username = null;
+      }
+      if (user.username) {
+        username = user.username;
+      }
+
       const data = new nftcollectionSchema({
         name: Credential.name,
         url: Credential.url,
@@ -87,7 +98,8 @@ class nftServices {
         paymentToken: Credential.paymentToken,
         logoImage: Credential.logoImage,
         bannerImage: Credential.bannerImage,
-        walletId: Credential.walletId,
+        walletId: userData.walletid,
+        Creator: username,
       });
       await data.save();
       logger.info(data);
@@ -363,12 +375,30 @@ class nftServices {
 
   async latest_Drops() {
     try {
-      const data = await nftSchema.find({}).sort({ created_at: -1 });
-      if (!data.length) {
-        return response.error("DB is empty");
-      } else {
-        return response.Success(data);
-      }
+      const data = await nftSchema
+        .find(
+          { isListed: true },
+          { _id: 1, itemname: 1, Creator: 1, thumbnailhash: 1 }
+        )
+        .sort({ created_at: -1 });
+      let ndata = data.map((item) => {
+        return { ...item._doc };
+      });
+      ndata.forEach(async (element) => {
+        element["Amount"] = 11;
+      });
+      // let data = await nftSchema.aggregate([
+      //   {
+      //     $lookup: {
+      //       from: "NftOfferCollection",
+      //       localField: "itemname",
+      //       foreignField: "itemname",
+      //       as: "nftDetails",
+      //     },
+      //   },
+      // ]);
+
+      return response.Success(ndata);
     } catch (err) {
       console.log("error :", err);
       return response.error("error while fetching data :", err);
@@ -409,16 +439,16 @@ class nftServices {
             count: {
               $sum: 1,
             },
-            data: {
-              $push: {
-                url: "$url",
-                links: "$links",
-                creatorearnings: "$creatorearnings",
-              },
+            bannerImage: {
+              $first: "$bannerImage",
+            },
+            Creator: {
+              $first: "$Creator",
             },
           },
         },
       ]);
+
       return response.Success("data :", data);
     } catch (error) {
       console.log("error :", error);
@@ -427,10 +457,22 @@ class nftServices {
   }
   async get_All_Nft() {
     try {
-      const data = await nftSchema.find({}).sort({ created_at: -1 });
-      return response.Success(data);
+      const data = await nftSchema
+        .find(
+          { isListed: true },
+          { _id: 1, itemname: 1, Creator: 1, thumbnailhash: 1 }
+        )
+        .sort({ created_at: -1 });
+      let ndata = data.map((item) => {
+        return { ...item._doc };
+      });
+      ndata.forEach(async (element) => {
+        element["Amount"] = 11;
+      });
+      return response.Success(ndata);
     } catch (error) {
       console.log("error :", error);
+      const result = await nftServices.topC;
       return response.error("error while fetching data :", error);
     }
   }
@@ -685,4 +727,5 @@ class nftServices {
     }
   }
 }
-module.exports = new nftServices();
+let nftServices = new NFTService();
+module.exports = nftServices;

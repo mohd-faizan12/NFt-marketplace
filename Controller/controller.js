@@ -41,14 +41,15 @@ class Controller {
   async walletConnect(req, res) {
     const Credential = req.body;
     const userDetails = req.userDetails;
-    const result = await userServices.walletConnect(Credential,userDetails);
+    const result = await userServices.walletConnect(Credential, userDetails);
     res.json({ result });
   }
 
   async uploadProfile(req, res) {
     const Credential = req.body;
-    const token = req.jwtToken;
-    const result = await userServices.uploadProfile(Credential, token);
+    const userData = req.userDetails; 
+
+    const result = await userServices.uploadProfile(Credential, userData);
     res.json({ result });
   }
 
@@ -66,7 +67,9 @@ class Controller {
 
   async createNftCollection(req, res) {
     const Credential = req.body;
-    const result = await nftservices.createNftCollection(Credential);
+    const userData = req.userDetails;
+
+    const result = await nftservices.createNftCollection(userData, Credential);
     res.json({ result });
   }
 

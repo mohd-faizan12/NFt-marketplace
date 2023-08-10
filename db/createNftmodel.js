@@ -3,10 +3,11 @@ const mongoose = require("mongoose");
 
 const nft_Schema = new mongoose.Schema({
   itemname: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
     require: true,
     unique: true,
     trim: true,
+    ref: "NftOfferCollection",
   },
   supply: {
     type: Number,

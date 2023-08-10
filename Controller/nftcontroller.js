@@ -30,7 +30,7 @@ class nftservices {
   }
 
   async Latest_Drop(req, res) {
-    const result = await nftServices.latest_Drops(res);
+    const result = await nftServices.latest_Drops();
     res.json(result);
   }
   async userLatest_Drop(req, res) {
@@ -51,6 +51,7 @@ class nftservices {
     res.json(result);
   }
   async top_Collection(req, res) {
+    console.log(nftServices);
     const result = await nftServices.topCollection();
     res.json(result);
   }

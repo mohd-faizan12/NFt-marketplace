@@ -34,7 +34,7 @@ route.post('/updatepassword', Controller.updatepassword);
 
 //---------------------------------------------------------------------
 route.post('/createnft', authMiddleware.userAuthanticationMiddleware, Controller.createNft);
-route.post('/createNftCollection', Controller.createNftCollection);
+route.post('/createNftCollection', authMiddleware.middleware_Auth,Controller.createNftCollection);
 route.post('/uploadvedio', uploadFile, Controller.uploadVedio);
 route.post('/qrcodecreate', authMiddleware.userAuthanticationMiddleware, Controller.qrcodeCreate);
 
@@ -75,7 +75,7 @@ route.get('/get-alloffers',nftcontroller.nftsOffer);
 route.post('/userFollow', authMiddleware.middleware_Auth, Controller.userFollow);
  
 route.get('/user-profileDetails',authMiddleware.middleware_Auth,nftcontroller.userProfileDetails);
-route.post('/uploadprofile', authMiddleware.userAuthanticationMiddleware, Controller.uploadProfile);
+route.post('/uploadprofile', authMiddleware.middleware_Auth, Controller.uploadProfile);
 
 
 

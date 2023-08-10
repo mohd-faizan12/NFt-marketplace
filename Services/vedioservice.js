@@ -309,12 +309,8 @@ class vedioservices {
             total: {
               $sum: 1,
             },
-            details: {
-              $push: {
-                itemname: "$itemname",
-                Creator: "$Creator",
-                amount: "$amount",
-              },
+            Creator: {
+              $first: "$Creator",
             },
             // Creator: {
             //   $push: "$Creator",
@@ -326,7 +322,14 @@ class vedioservices {
         },
         { $sort: { total: -1 } },
       ]);
-      return response.Success(data);
+      let ndata = data.map((item) => {
+        return { ...item };
+      });
+      ndata.forEach(async (element) => {
+        element["Amount"] = 11;
+      });
+
+      return response.Success(ndata);
     } catch (err) {
       console.log("error :", err);
       return response.error("error while fetching top creaters", err);

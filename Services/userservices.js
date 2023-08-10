@@ -15,6 +15,7 @@ const emailServices = require("../utilities/Emailservices");
 const emailSubjects = require("../utilities/emailSubject");
 const userfollowers = require("../db/userFollowings");
 const user = require("../db/user");
+const nftCollectionmodel = require("../db/nftCollectionmodel");
 
 class userServices {
   async user_registration(Credential) {
@@ -440,15 +441,26 @@ class userServices {
     }
   }
 
-  async uploadProfile(Credential, authHeader) {
+  async uploadProfile(Credential, userData) {
     try {
       let pass;
       if (Credential.password) {
         pass = bcrypt.hashSync(Credential.password, bcrypt.genSaltSync());
       }
-
+      if (Credential.username) {
+        const update = await nftCollectionmodel.updateMany(
+          {
+            walletId: userData.walletid,
+          },
+          {
+            $set: {
+              Creator: Credential.username,
+            },
+          }
+        );
+      }
       const updatedata = await user.updateOne(
-        { jwttoken: authHeader },
+        { jwttoken: userData.jwttoken },
         {
           $set: {
             fullname: Credential.fullname,
