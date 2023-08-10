@@ -8,11 +8,7 @@ const list_Schema = new mongoose.Schema({
     lowercase: true,
     trim: true,
   },
-  creator: {
-    type: String,
-    trim: true,
-  },
-  Url: {
+  nftThumbnail: {
     type: String,
   },
   listingType: {
@@ -31,12 +27,6 @@ const list_Schema = new mongoose.Schema({
       },
     },
   ],
-  creatorFee: {
-    type: String,
-  },
-  serviceFee: {
-    type: String,
-  },
 });
 
 module.exports = mongoose.model("ListingNftCollection", list_Schema);

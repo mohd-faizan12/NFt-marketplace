@@ -66,6 +66,10 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  profileImageUrl: {
+    type: String,
+    default: null,
+  },
 });
 
 module.exports = mongoose.model("user", userSchema);

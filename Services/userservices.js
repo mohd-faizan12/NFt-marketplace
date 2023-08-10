@@ -470,6 +470,7 @@ class userServices {
             password: pass,
             discord: Credential.discord,
             twitter: Credential.twitter,
+            profileImageUrl: Credential.ImageUrl,
           },
         }
       );

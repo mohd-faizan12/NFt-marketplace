@@ -484,6 +484,8 @@ class NFTService {
         return { ...item._doc };
       });
       ndata.forEach((element) => {
+        element["CreatorFee"] = process.env.creator_Fee;
+        element["ServiceFee"] = process.env.serviceFee;
         if (element.walletid == addr) {
           element["userData"] = true;
         } else {
@@ -535,12 +537,9 @@ class NFTService {
       }
       const datas = new listingSchema({
         itemname: Credential.itemname,
-        creator: Credential.creator,
-        Url: Credential.url,
+        nftThumbnail: Credential.url,
         listingType: Credential.type,
         nftPrice: Credential.amount,
-        creatorFee: Credential.creatorFee,
-        serviceFee: Credential.serviceFee,
         duration: null,
       });
       await datas.save();

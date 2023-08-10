@@ -1,4 +1,3 @@
-// const { string } = require("hardhat/internal/core/params/argumentTypes");
 const mongoose = require("mongoose");
 
 const nft_Schema = new mongoose.Schema({
@@ -57,7 +56,7 @@ const nft_Schema = new mongoose.Schema({
     default: new Date(),
   },
   isListed: {
-    type: String,
+    type: Boolean,
     default: false,
   },
 });

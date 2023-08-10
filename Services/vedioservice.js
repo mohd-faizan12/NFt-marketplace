@@ -13,6 +13,7 @@ const QRCode = require("qrcode");
 
 const response = require("../Exception-handeling/Exceptionhandeling");
 const { createModulerLogger } = require("../LoggerServices/loggerservices");
+const user = require("../db/user");
 const logger = createModulerLogger("userServices");
 
 class vedioservices {
@@ -304,32 +305,49 @@ class vedioservices {
     try {
       const data = await nftSchema.aggregate([
         {
-          $group: {
-            _id: "$walletid",
-            total: {
-              $sum: 1,
-            },
-            Creator: {
-              $first: "$Creator",
-            },
-            // Creator: {
-            //   $push: "$Creator",
-            // },
-            // amount: {
-            //   $push: "$amount",
-            // },
+          $match: {
+            isListed: true,
           },
         },
-        { $sort: { total: -1 } },
+        {
+          $lookup: {
+            from: "users",
+            localField: "walletid",
+            foreignField: "walletid",
+            as: "result",
+          },
+        },
+
+        {
+          $project: {
+            Creator: 1,
+            "result.profileImageUrl": 1,
+          },
+        },
+        {
+          $group: {
+            _id: "$Creator", // Group by the "Creator" field
+            count: { $sum: 1 }, // Count the occurrences of each "Creator"
+            profileImageUrls: { $addToSet: "$result.profileImageUrl" }, // Collect profile image URLs
+          },
+        },
+        {
+          $project: {
+            Creator: "$_id",
+            count: 1,
+            profileImageUrl: "$profileImageUrls",
+
+            _id: 0,
+          },
+        },
       ]);
-      let ndata = data.map((item) => {
+      let x = data.map((item) => {
         return { ...item };
       });
-      ndata.forEach(async (element) => {
+      x.forEach((element) => {
         element["Amount"] = 11;
       });
-
-      return response.Success(ndata);
+      return response.Success(x);
     } catch (err) {
       console.log("error :", err);
       return response.error("error while fetching top creaters", err);
