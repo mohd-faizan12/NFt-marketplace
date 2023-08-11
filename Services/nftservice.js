@@ -375,28 +375,47 @@ class NFTService {
 
   async latest_Drops() {
     try {
-      const data = await nftSchema
-        .find(
-          { isListed: true },
-          { _id: 1, itemname: 1, Creator: 1, thumbnailhash: 1 }
-        )
-        .sort({ created_at: -1 });
+      const data = await nftSchema.aggregate([
+        {
+          $match: {
+            isListed: true,
+          },
+        },
+        {
+          $lookup: {
+            from: "users",
+            localField: "walletid",
+            foreignField: "walletid",
+            as: "result",
+          },
+        },
+        {
+          $unwind: "$result",
+        },
+        {
+          $project: {
+            itemname: 1,
+            thumbnailhash: 1,
+            result: {
+              $ifNull: ["$result.username", null],
+            },
+          },
+        },
+        {
+          $sort: {
+            created_at: -1,
+          },
+        },
+      ]);
+
       let ndata = data.map((item) => {
-        return { ...item._doc };
+        return { ...item };
       });
       ndata.forEach(async (element) => {
+        if (!element.Creator) {
+        }
         element["Amount"] = 11;
       });
-      // let data = await nftSchema.aggregate([
-      //   {
-      //     $lookup: {
-      //       from: "NftOfferCollection",
-      //       localField: "itemname",
-      //       foreignField: "itemname",
-      //       as: "nftDetails",
-      //     },
-      //   },
-      // ]);
 
       return response.Success(ndata);
     } catch (err) {

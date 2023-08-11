@@ -14,6 +14,7 @@ const QRCode = require("qrcode");
 const response = require("../Exception-handeling/Exceptionhandeling");
 const { createModulerLogger } = require("../LoggerServices/loggerservices");
 const user = require("../db/user");
+const nftCollectionmodel = require("../db/nftCollectionmodel");
 const logger = createModulerLogger("userServices");
 
 class vedioservices {
@@ -86,6 +87,12 @@ class vedioservices {
         return response.error_Bad_request(
           "Please pass nft vedeo or thumbnail or Item name"
         );
+      }
+      const collectn = await nftCollectionmodel.findOne({
+        name: Credential.nftcollection,
+      });
+      if (!collectn) {
+        return response.Not_Found_Error("No collection exist with such name");
       }
       let ext1 = req.files.video[0].originalname
         .split(/[#?]/)[0]
@@ -333,27 +340,35 @@ class vedioservices {
             as: "result",
           },
         },
-
+        {
+          $unwind: "$result",
+        },
         {
           $project: {
-            Creator: 1,
+            walletid: 1,
             "result.profileImageUrl": 1,
+            "result.username": 1,
           },
         },
         {
           $group: {
-            _id: "$Creator", // Group by the "Creator" field
+            _id: "$walletid", // Group by the "Creator" field
             count: { $sum: 1 }, // Count the occurrences of each "Creator"
-            profileImageUrls: { $addToSet: "$result.profileImageUrl" }, // Collect profile image URLs
+            profileImageUrl: { $addToSet: "$result.profileImageUrl" }, // Collect profile image URLs
+            creatorname: { $addToSet: "$result.username" },
           },
         },
         {
           $project: {
-            Creator: "$_id",
+            _id: 1,
+            Creator: "$creatorname",
+            profileImageUrl: "$profileImageUrl",
             count: 1,
-            profileImageUrl: "$profileImageUrls",
-
-            _id: 0,
+          },
+        },
+        {
+          $sort: {
+            count: -1,
           },
         },
       ]);
