@@ -9,7 +9,6 @@ const nft_Schema = new mongoose.Schema({
   },
   supply: {
     type: Number,
-    require: true,
     trim: true,
   },
   blockchain: {

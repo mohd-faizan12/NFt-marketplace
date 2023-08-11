@@ -8,7 +8,7 @@ const list_Schema = new mongoose.Schema({
     lowercase: true,
     trim: true,
   },
-  nftThumbnail: {
+  thumbnailhash: {
     type: String,
   },
   listingType: {

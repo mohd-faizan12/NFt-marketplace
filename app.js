@@ -8,8 +8,9 @@ const mongoose = require("mongoose");
 //-----------------------------------
 const app = express();
 app.use(cors());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ limit: "100mb", extended: true }));
 app.use(bodyParser.json());
+
 const { createModulerLogger } = require("./LoggerServices/loggerservices");
 const logger = createModulerLogger("app.js");
 //-------------------------------------database configration---------------------------------------

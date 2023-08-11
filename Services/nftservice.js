@@ -520,26 +520,22 @@ class NFTService {
 
   async ListNft(Credential) {
     try {
+      if (!Credential.itemname || !Credential.type || !Credential.price) {
+        return response.error("Please pass all required fields");
+      }
       if (Credential.type != "Fixed" && Credential.type != "Duration") {
         return response.error("Type is not valid");
       }
-      if (
-        !Credential.itemname ||
-        !Credential.type ||
-        !Credential.creator ||
-        !Credential.amount
-      ) {
-        return response.error("Please pass all required fields");
-      }
+
       const data = await nftSchema.findOne({ itemname: Credential.itemname });
       if (!data) {
         return response.error("Please list a valid nft");
       }
       const datas = new listingSchema({
         itemname: Credential.itemname,
-        nftThumbnail: Credential.url,
+        thumbnailhash: Credential.thumbnailhash,
         listingType: Credential.type,
-        nftPrice: Credential.amount,
+        nftPrice: Credential.price,
         duration: null,
       });
       await datas.save();
@@ -654,19 +650,43 @@ class NFTService {
     try {
       let data;
       if (query.collection || query.Listed) {
-        if (query.colletcion) {
-          data = await nftSchema.find({
+        if (query.collection) {
+          let ndata = await nftSchema.find({
             walletid: Credential,
-            nftcollection: query.colletcion,
+            nftcollection: query.collection,
+          });
+          let x = ndata.map((item) => {
+            return { ...item._doc };
+          });
+          data = x.map((element) => {
+            element["CreatorFee"] = process.env.creator_Fee;
+            element["ServiceFee"] = process.env.serviceFee;
+            return element;
           });
         } else if (query.Listed) {
-          data = await nftSchema.find({
+          let ndata = await nftSchema.find({
             walletid: Credential,
             isListed: true,
           });
+          let x = ndata.map((item) => {
+            return { ...item._doc };
+          });
+          data = x.map((element) => {
+            element["CreatorFee"] = process.env.creator_Fee;
+            element["ServiceFee"] = process.env.serviceFee;
+            return element;
+          });
         }
       } else {
-        data = await nftSchema.find({ walletid: Credential });
+        let ndata = await nftSchema.find({ walletid: Credential });
+        let x = ndata.map((item) => {
+          return { ...item._doc };
+        });
+        data = x.map((element) => {
+          element["CreatorFee"] = process.env.creator_Fee;
+          element["ServiceFee"] = process.env.serviceFee;
+          return element;
+        });
       }
       return response.Success(data);
     } catch (error) {

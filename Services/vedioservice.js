@@ -87,6 +87,16 @@ class vedioservices {
           "Please pass nft vedeo or thumbnail or Item name"
         );
       }
+      let ext1 = req.files.video[0].originalname
+        .split(/[#?]/)[0]
+        .split(".")
+        .pop()
+        .trim();
+      let ext2 = req.files.thumbnail[0].originalname
+        .split(/[#?]/)[0]
+        .split(".")
+        .pop()
+        .trim();
       const nftData = await nftSchema.findOne({
         itemname: Credential.itemname,
       });
@@ -127,8 +137,12 @@ class vedioservices {
         let params = {
           Bucket: process.env.Bucket_Name,
           Key: `${
-            "Nft-vedeo" + req.files.video[0].encoding + new Date().toISOString()
-          }.png`, // File name you want to save as in S3
+            "Nft-vedeo" +
+            req.files.video[0].encoding +
+            new Date().toISOString() +
+            "." +
+            ext1
+          }`, // File name you want to save as in S3
           Body: fileBuffer,
         };
         let stored = await s3.upload(params).promise();
@@ -142,8 +156,10 @@ class vedioservices {
             "-" +
             req.files.video[0].encoding +
             "-" +
-            new Date().toISOString()
-          }.png`, // File name you want to save as in S3
+            new Date().toISOString() +
+            "." +
+            ext2
+          }`, // File name you want to save as in S3
           Body: thumbnailBuffer,
         };
         let upload = await s3.upload(params).promise();
@@ -170,7 +186,7 @@ class vedioservices {
       }
 
       if (!dataFunction) {
-        return res.status(404).json({ Error: "please pass all feilds" });
+        return response.error_Bad_request("Please pass all fields");
       }
       const count = await web3.eth.getTransactionCount(account.address);
 

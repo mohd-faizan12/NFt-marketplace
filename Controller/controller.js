@@ -47,7 +47,7 @@ class Controller {
 
   async uploadProfile(req, res) {
     const Credential = req.body;
-    const userData = req.userDetails; 
+    const userData = req.userDetails;
 
     const result = await userServices.uploadProfile(Credential, userData);
     res.json({ result });
