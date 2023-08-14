@@ -72,7 +72,9 @@ class authMiddleware {
         );
       }
     } catch (error) {
-      return response.error("Authantication is failed" + error);
+      return res.status(404).json({
+        message: "Authentication failed" + error,
+      });
     }
   }
 }

@@ -396,7 +396,7 @@ class NFTService {
           $project: {
             itemname: 1,
             thumbnailhash: 1,
-            result: {
+            Creator: {
               $ifNull: ["$result.username", null],
             },
           },
@@ -431,16 +431,49 @@ class NFTService {
       if (!addr) {
         return response.error_Bad_request("Wallet id could not be found");
       }
-
-      let data = await nftSchema.find({}).sort({ created_at: -1 });
+      const data = await nftSchema.aggregate([
+        {
+          $match: {
+            isListed: true,
+          },
+        },
+        {
+          $lookup: {
+            from: "users",
+            localField: "walletid",
+            foreignField: "walletid",
+            as: "result",
+          },
+        },
+        {
+          $unwind: "$result",
+        },
+        {
+          $project: {
+            _id: "$result.walletid",
+            itemname: 1,
+            thumbnailhash: 1,
+            Creator: {
+              $ifNull: ["$result.username", null],
+            },
+          },
+        },
+        {
+          $sort: {
+            created_at: -1,
+          },
+        },
+      ]);
       let ndata = data.map((item) => {
-        return { ...item._doc };
+        return { ...item };
       });
       ndata.forEach((element) => {
-        if (element.walletid == addr) {
-          element["userData"] = true;
+        element["Amount"] = 11;
+
+        if (element._id == addr) {
+          element["isUserData"] = true;
         } else {
-          element["userData"] = false;
+          element["isUserData"] = false;
         }
       });
       return response.Success(ndata);

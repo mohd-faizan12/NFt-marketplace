@@ -390,30 +390,51 @@ class vedioservices {
       if (!addr) {
         return response.error_Bad_request("Wallet address could not be found");
       }
-      let data = await nftSchema.aggregate([
+     const data = await nftSchema.aggregate([
         {
-          $group: {
-            _id: "$walletid",
-            total: {
-              $sum: 1,
-            },
-            details: {
-              $push: {
-                itemname: "$itemname",
-                Creator: "$Creator",
-                amount: "$amount",
-                walletId: "$walletid",
-              },
-            },
-            // Creator: {
-            //   $push: "$Creator",
-            // },
-            // amount: {
-            //   $push: "$amount",
-            // },
+          $match: {
+            isListed: true,
           },
         },
-        { $sort: { total: -1 } },
+        {
+          $lookup: {
+            from: "users",
+            localField: "walletid",
+            foreignField: "walletid",
+            as: "result",
+          },
+        },
+        {
+          $unwind: "$result",
+        },
+        {
+          $project: {
+            walletid: 1,
+            "result.profileImageUrl": 1,
+            "result.username": 1,
+          },
+        },
+        {
+          $group: {
+            _id: "$walletid", // Group by the "Creator" field
+            count: { $sum: 1 }, // Count the occurrences of each "Creator"
+            profileImageUrl: { $addToSet: "$result.profileImageUrl" }, // Collect profile image URLs
+            creatorname: { $addToSet: "$result.username" },
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            Creator: "$creatorname",
+            profileImageUrl: "$profileImageUrl",
+            count: 1,
+          },
+        },
+        {
+          $sort: {
+            count: -1,
+          },
+        },
       ]);
       let ndata = data.map((item) => {
         return { ...item };
