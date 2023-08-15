@@ -247,8 +247,6 @@ class vedioservices {
         transactionHash: createReceipt.transactionHash,
         walletid: account.address,
         tokenId: finalTokenID,
-        Creator: userData.fullname,
-        email: userData.email,
       });
 
       await datasave.save();
@@ -354,15 +352,30 @@ class vedioservices {
           $group: {
             _id: "$walletid", // Group by the "Creator" field
             count: { $sum: 1 }, // Count the occurrences of each "Creator"
-            profileImageUrl: { $addToSet: "$result.profileImageUrl" }, // Collect profile image URLs
-            creatorname: { $addToSet: "$result.username" },
+            profileImageUrl: {
+              $addToSet: {
+                $ifNull: ["$result.profileImageUrl", null],
+              },
+            }, // Collect profile image URLs
+            Creator: {
+              $addToSet: {
+                $ifNull: ["$result.username", null],
+              },
+            },
           },
         },
         {
+          $unwind: "$profileImageUrl",
+        },
+        {
+          $unwind: "$Creator",
+        },
+
+        {
           $project: {
             _id: 1,
-            Creator: "$creatorname",
-            profileImageUrl: "$profileImageUrl",
+            Creator: 1,
+            profileImageUrl: 1,
             count: 1,
           },
         },
@@ -390,7 +403,7 @@ class vedioservices {
       if (!addr) {
         return response.error_Bad_request("Wallet address could not be found");
       }
-     const data = await nftSchema.aggregate([
+      const data = await nftSchema.aggregate([
         {
           $match: {
             isListed: true,
@@ -425,7 +438,7 @@ class vedioservices {
         {
           $project: {
             _id: 1,
-            Creator: "$creatorname",
+            Creator: { $arrayToobject: "$creatorname" },
             profileImageUrl: "$profileImageUrl",
             count: 1,
           },

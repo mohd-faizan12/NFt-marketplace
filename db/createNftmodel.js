@@ -39,16 +39,6 @@ const nft_Schema = new mongoose.Schema({
   videohash: String,
   thumbnailhash: String,
   tokenId: Number,
-  Creator: {
-    type: String,
-    lowercase: true,
-    trim: true,
-  },
-  email: {
-    type: String,
-    lowercase: true,
-    trim: true,
-  },
   created_at: {
     type: Date,
     default: new Date(),

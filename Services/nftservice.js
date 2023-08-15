@@ -10,6 +10,7 @@ const listingSchema = require("../db/listNftModel");
 const { default: mongoose } = require("mongoose");
 const nftOfferModel = require("../db/nftOfferModel");
 const followSchema = require("../db/userFollowings");
+const { name } = require("ejs");
 // const { nftDetails } = require("../Controller/nftcontroller");
 // const jwt = require("jsonwebtoken");
 // const Jwtkey = require("../utilities/jwtutilis");
@@ -70,21 +71,12 @@ class NFTService {
 
   async createNftCollection(userData, Credential) {
     try {
-      let email = userData.email;
       if (
         !Credential.name ||
         !Credential.logoImage ||
         !Credential.bannerImage
       ) {
         return response.error_Bad_request("Please pass required fields");
-      }
-      const user = await userSchema.findOne({ email: email });
-      let username;
-      if (!user || !user.username) {
-        username = null;
-      }
-      if (user.username) {
-        username = user.username;
       }
 
       const data = new nftcollectionSchema({
@@ -98,8 +90,7 @@ class NFTService {
         paymentToken: Credential.paymentToken,
         logoImage: Credential.logoImage,
         bannerImage: Credential.bannerImage,
-        walletId: userData.walletid,
-        Creator: username,
+        walletId: userData.walletid.toLowerCase(),
       });
       await data.save();
       logger.info(data);
@@ -486,18 +477,55 @@ class NFTService {
     try {
       const data = await nftcollectionSchema.aggregate([
         {
-          $group: {
-            _id: "$name",
-            count: {
-              $sum: 1,
-            },
-            bannerImage: {
-              $first: "$bannerImage",
-            },
-            Creator: {
-              $first: "$Creator",
-            },
+          $lookup: {
+            from: "users",
+            localField: "walletId",
+            foreignField: "walletid",
+            as: "user_Data",
           },
+        },
+        {
+          $unwind: "$user_Data",
+        },
+        {
+          $project: {
+            bannerImage: 1,
+            name: 1,
+            Creator: { $ifNull: ["$user_Data.username", null] },
+          },
+        },
+        {
+          $lookup: {
+            from: "createnfts",
+            localField: "name",
+            foreignField: "nftcollection",
+            as: "Result",
+          },
+        },
+        {
+          $unwind: "$Result",
+        },
+        {
+          $match: { "Result.isListed": true },
+        },
+        {
+          $group: {
+            _id: "$Result.nftcollection",
+            count: { $sum: 1 },
+            Creator: { $addToSet: "$Creator" },
+            bannerImage: { $addToSet: "$bannerImage" },
+          },
+        },
+        {
+          $project: {
+            _id: 1,
+            Creator: 1,
+            bannerImage: 1,
+            count: 1,
+          },
+        },
+        {
+          $sort: { count: -1 },
         },
       ]);
 
@@ -509,17 +537,38 @@ class NFTService {
   }
   async get_All_Nft() {
     try {
-      const data = await nftSchema
-        .find(
-          { isListed: true },
-          { _id: 1, itemname: 1, Creator: 1, thumbnailhash: 1 }
-        )
-        .sort({ created_at: -1 });
+      const data = await nftSchema.aggregate([
+        {
+          $match: { isListed: true },
+        },
+        {
+          $lookup: {
+            from: "users",
+            localField: "walletid",
+            foreignField: "walletid",
+            as: "user_Data",
+          },
+        },
+        {
+          $unwind: "$user_Data",
+        },
+        {
+          $project: {
+            itemname: 1,
+            thumbnailhash: 1,
+            Creator: {
+              $ifNull: ["$user_Data.username", null],
+            },
+          },
+        },
+      ]);
+
       let ndata = data.map((item) => {
-        return { ...item._doc };
+        return { ...item };
       });
       ndata.forEach(async (element) => {
         element["Amount"] = 11;
+        return element;
       });
       return response.Success(ndata);
     } catch (error) {

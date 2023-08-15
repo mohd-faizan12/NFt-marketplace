@@ -447,18 +447,6 @@ class userServices {
       if (Credential.password) {
         pass = bcrypt.hashSync(Credential.password, bcrypt.genSaltSync());
       }
-      if (Credential.username) {
-        const update = await nftCollectionmodel.updateMany(
-          {
-            walletId: userData.walletid,
-          },
-          {
-            $set: {
-              Creator: Credential.username,
-            },
-          }
-        );
-      }
       const updatedata = await user.updateOne(
         { jwttoken: userData.jwttoken },
         {
@@ -477,12 +465,6 @@ class userServices {
 
       return response.Success("Profile updated successfully");
     } catch (err) {
-      route.post(
-        "/uploadprofile",
-        authMiddleware.userAuthanticationMiddleware,
-        Controller.uploadProfile
-      );
-
       logger.error("data could not be updated");
       return response.error_Bad_request("data could not be updated" + err);
     }
